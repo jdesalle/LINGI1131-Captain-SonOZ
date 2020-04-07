@@ -1,11 +1,17 @@
 functor
 import
-    GUI
-    Input
+   GUI
+   Input
    PlayerManager
+   OS
+
 define
-    % ...
-in
+   WindowPort
+
    
-end
+in
+   thread
+      WindowPort={GUI.portWindow}
+      {Send WindowPort buildWindow}
+   end
 end
