@@ -21,9 +21,6 @@ PSEUDO CODE:
   endGame()
 
 
-
-
-
 #functions definitions
 ----------------------------------------------
 #initGame()
