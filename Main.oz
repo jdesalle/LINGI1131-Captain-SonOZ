@@ -17,8 +17,8 @@ in
    thread
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
-     %PortsSubmarines={CreatePortSubmarine}
-     % {System.show PortsSubmarines}
+     PortsSubmarines={CreatePortSubmarine}
+      {System.show PortsSubmarines}
    end
    
 %---------------Jeu-------------
@@ -31,18 +31,18 @@ in
   
  %   end
 
-  %  %%------------Fonctions-initialisation-----
- %   fun{CreatePortSubmarine} %Could not link module Could not load functor at URL:Player1.ozf
- %      fun{CreatePortSubmarineAAA Subs Colors ID}
- % 	 case Subs of _|_ then
- % 	    {PlayerManager.playerGenerator Subs.1 Colors.1 ID}|{CreatePortSubmarineAAA Subs.2 Colors.2 ID+1}
- % 	 []nil then nil
- % 	 end
- %      end
- %   in
- %      {CreatePortSubmarineAAA Input.players Input.colors 1}
- %   end
- % end
+   %%------------Fonctions-initialisation-----
+   fun{CreatePortSubmarine} %Could not link module Could not load functor at URL:Player1.ozf
+      fun{CreatePortSubmarineAAA Subs Colors ID}
+ 	 case Subs of _|_ then
+ 	    {PlayerManager.playerGenerator Subs.1 Colors.1 ID}|{CreatePortSubmarineAAA Subs.2 Colors.2 ID+1}
+ 	 []nil then nil
+ 	 end
+      end
+   in
+      {CreatePortSubmarineAAA Input.players Input.colors 1}
+   end
+ end
 
 
 

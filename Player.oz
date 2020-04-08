@@ -5,7 +5,27 @@ export
     portPlayer:StartPlayer
 define
     StartPlayer
-    TreatStream
+   TreatStream
+
+   InitPosition
+   Move
+   Dive
+   ChargeItem
+   FireItem
+   FireMine
+   IsDead
+   SayMove
+   SaySurface
+   SayCharge
+   SayMinePlaced
+   SayMissileExplode
+   SayMineExplode
+   SayPassingDrone
+   SayAnswerDrone
+   SayPassingSonar
+   SayAnswerSonar
+   SayDeath
+   SayDamageTaken
 in
     proc{TreatStream Stream <p1> <p2> ...} % as as many parameters as you want
         % ...
