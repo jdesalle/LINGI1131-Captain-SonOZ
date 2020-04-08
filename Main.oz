@@ -48,7 +48,7 @@ in
 %create ids for every player 
 fun{CreateIds}
    fun{CreateIdsAAA NbPlayers}
-
+%to do
    end
 end
 
