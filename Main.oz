@@ -4,7 +4,7 @@ import
    Input
    PlayerManager
    OS
-
+   System
 define
    WindowPort
    PortsSubmarines
@@ -17,33 +17,32 @@ in
    thread
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
-      PortsSubmarines={CreatePortSubmarine}
-      
+     %PortsSubmarines={CreatePortSubmarine}
+     % {System.show PortsSubmarines}
    end
    
 %---------------Jeu-------------
    
-   if(Input.isTurnByTurn) then
-      %trucs pour le turn by turn
+ %   if(Input.isTurnByTurn) then
+ %      %trucs pour le turn by turn
       
-   else 
- %Trucs pour le simultane
+ %   else 
+ % %Trucs pour le simultane
   
-   end
+ %   end
 
-   %%------------Fonctions-initialisation-----
-   %NOT YET WORKING
-%    fun{CreatePortSubmarine}
-%       fun{CreatePortSubmarineAAA Players Color ID}
-% 	 case Subs of _|_ then
-% 	    {PlayerManager.playerGenerator Players.1 player(id:ID color:Colors.1)}|CreatePortSubmarineAAA Players.2 Colors.2}
-%          []nil then nil
-%        end
-%    end
-% in
-% {CreatePortSubmarineAAA Input.Players Input.Colors 2}
-% end
-end
+  %  %%------------Fonctions-initialisation-----
+ %   fun{CreatePortSubmarine} %Could not link module Could not load functor at URL:Player1.ozf
+ %      fun{CreatePortSubmarineAAA Subs Colors ID}
+ % 	 case Subs of _|_ then
+ % 	    {PlayerManager.playerGenerator Subs.1 Colors.1 ID}|{CreatePortSubmarineAAA Subs.2 Colors.2 ID+1}
+ % 	 []nil then nil
+ % 	 end
+ %      end
+ %   in
+ %      {CreatePortSubmarineAAA Input.players Input.colors 1}
+ %   end
+ % end
 
 
 
