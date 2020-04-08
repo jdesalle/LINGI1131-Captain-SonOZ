@@ -18,7 +18,7 @@ in
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
      PortsSubmarines={CreatePortSubmarine}
-      {System.show PortsSubmarines}
+     % {System.show PortsSubmarines}
    end
    
 %---------------Jeu-------------
@@ -32,7 +32,8 @@ in
  %   end
 
    %%------------Fonctions-initialisation-----
-   fun{CreatePortSubmarine} %Could not link module Could not load functor at URL:Player1.ozf
+   %create port for every player
+   fun{CreatePortSubmarine}
       fun{CreatePortSubmarineAAA Subs Colors ID}
  	 case Subs of _|_ then
  	    {PlayerManager.playerGenerator Subs.1 Colors.1 ID}|{CreatePortSubmarineAAA Subs.2 Colors.2 ID+1}
@@ -44,6 +45,12 @@ in
    end
  end
 
+%create ids for every player 
+fun{CreateIds}
+   fun{CreateIdsAAA NbPlayers}
+
+   end
+end
 
 
 
