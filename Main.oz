@@ -11,6 +11,9 @@ define
    CreatePortSubmarine
    CreateIds
    IdPlayers
+   AvailablePositions
+   Positions
+   AssignSpawn
    
 in
    
@@ -20,10 +23,12 @@ in
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
-   %  {System.show PortsSubmarines}
-      IdPlayers={CreateIds PortsSubmarines} 
-      {Send WindowPort initPlayer(IdPlayers.1 pt(x:2 y:2))} 
+     %{System.show 'yeah'}    
+      IdPlayers={CreateIds PortsSubmarines}
+      Positions={AvailablePositions}
+      {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn 
       %{Send WindowPort drawMine(1|1|nil)}
+      {System.show {AvailablePositions}} %couille car donne nil alors que ca devrait pas. Je vois pas mon erreur :(
    end
    
 
@@ -50,9 +55,40 @@ in
       []nil then nil
       end
    end
+
+ %WORK IN PROGRESS
+%Returns a list of positions pt(x:X y:Y) where there is no island
+   fun{AvailablePositions}
+      fun{AvailablePositionsAAA Acc X Y List} 
+	 case Acc of H|T then
+	    if X==Input.nColumn then
+	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 List|pt(x:X y:Y)}
+	       else
+		  {AvailablePositionsAAA Acc.2 1 Y+1 List}
+	       end
+	    else
+	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y List|pt(x:X y:Y)}
+	       else
+		  {AvailablePositionsAAA Acc.2 X+1 Y List}
+	       end
+	    end	        
+	 []nil then (List|nil).2 %on est au bout, on skip le premier element qui est nil
+	 end
+      end	  
+   in
+      {AvailablePositionsAAA {List.flatten Input.map} 1 1 nil}
+   end
+      
+
+   %TO DO
+   %Choisis des positions au hasard parmis la liste. S'assure que les spawns sont suffisament ecartes?
+   %Retourne une liste de la longueur du nombre de joueurs 
+   fun{AssignSpawn AvailablePositions}
+      AvailablePositions.1 %A modifier
+   end
+
+
 end
-
-
 
 
 

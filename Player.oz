@@ -1,10 +1,10 @@
 functor
 import
-    Input
+   Input
 export
-    portPlayer:StartPlayer
+   portPlayer:StartPlayer
 define
-    StartPlayer
+   StartPlayer
    TreatStream
 
    InitPosition
@@ -27,28 +27,30 @@ define
    SayDeath
    SayDamageTaken
 in
-    proc{TreatStream Stream <p1> <p2> ...} % as as many parameters as you want
+   proc{TreatStream Stream <p1> <p2> ...} % as as many parameters as you want
         % ...
-       case Stream
-       of getId(ID)|T then
-	  {TreatStream T {GetId State ID}}
+      case Stream
+      of getId(ID)|T then
+	 {System.show 'treating GetId'}
+	 {TreatStream T {GetId State ID}}
 
 %Ici il faut traiter le cas pour chaque fonction de player..
-       end
-    end
-    fun{StartPlayer Color ID}
-        Stream
-        Port
-    in
-        {NewPort Stream Port}
-        thread
-            {TreatStream Stream <p1> <p2> ...}
-        end
-        Port
-    end
+      end
+   end
+   fun{StartPlayer Color ID}
+      Stream
+      Port
+   in
+      {NewPort Stream Port}
+      thread
+	 {TreatStream Stream <p1> <p2> ...}
+      end
+      Port
+   end
     
-    fun {GetId State ID}
-ID=State.id
-State
-    end  
+   fun {GetId State ID}
+      ID=State.id
+      {System.show 'executing GetId'}
+      State
+   end  
 end
