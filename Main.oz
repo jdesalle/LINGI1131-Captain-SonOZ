@@ -21,10 +21,10 @@ in
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
      {System.show PortsSubmarines}
-      IdPlayers={CreateIds PortsSubmarines}
+     % IdPlayers={CreateIds PortsSubmarines} not working yet
       {System.show IdPlayers}
       {System.show 42}
-      {Send WindowPort initPlayer(IdPlayers.1 1|2)}
+      %{Send WindowPort initPlayer(IdPlayers.1 1|2)} not working yet
       {System.show 43}
       %{Send WindowPort drawMine(1|1|nil)}
    end
