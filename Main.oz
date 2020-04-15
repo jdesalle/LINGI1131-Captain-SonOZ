@@ -20,12 +20,12 @@ in
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
-     {System.show PortsSubmarines}
-     % IdPlayers={CreateIds PortsSubmarines} not working yet
-      {System.show IdPlayers}
-      {System.show 42}
-      %{Send WindowPort initPlayer(IdPlayers.1 1|2)} not working yet
-      {System.show 43}
+   %  {System.show PortsSubmarines}
+      IdPlayers={CreateIds PortsSubmarines} 
+     % {System.show IdPlayers}
+     % {System.show 42}
+      {Send WindowPort initPlayer(IdPlayers.1 pt(x:2 y:2))} 
+    %  {System.show 43}
       %{Send WindowPort drawMine(1|1|nil)}
    end
    
@@ -43,11 +43,11 @@ in
       {CreatePortSubmarineAAA Input.players Input.colors 1}
    end
 
-%create ids for every player 
+%create ids for every player and returns a list of ids
    fun{CreateIds Ports}
       case Ports of H|T then
 	 local X in
-	    {Send H getId(X)} %pour que ca marche il faut ajouter une fonction GetId dans player et traiter le cas getId(X) dans la fonction TreatStream de player
+	    {Send H getId(X)}
 	    X|{CreateIds T}
 	 end
       []nil then nil
