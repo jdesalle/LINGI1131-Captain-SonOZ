@@ -22,10 +22,7 @@ in
       PortsSubmarines={CreatePortSubmarine}
    %  {System.show PortsSubmarines}
       IdPlayers={CreateIds PortsSubmarines} 
-     % {System.show IdPlayers}
-     % {System.show 42}
       {Send WindowPort initPlayer(IdPlayers.1 pt(x:2 y:2))} 
-    %  {System.show 43}
       %{Send WindowPort drawMine(1|1|nil)}
    end
    
