@@ -15,32 +15,35 @@ define
    Positions
    AssignSpawn
    PickRandom
- 
+   Spawns
+
+   StateList
    SetState%%%%to set the state
-   InitSateList %%%initiate StateList friom portlist
+   InitStateList %%%initiate StateList friom portlist
    AddMine%%%%add mine in currentmine list
    checkMine%%%%%check if there is a mine in current position
 in
    %%%%%create a state from the differents agruments
    fun{SetState ID Port Position FormerPositions Surface Items Charges}
-      state(id:ID port:Port position:Position formerPos:FormerPositions surface: Surface items:Items charges:Charges)
+      state(id:ID port:Port position:Position formerPos:FormerPositions surface:Surface items:Items charges:Charges)
    end
+   
    %%create a list of state from the port open and the availables positions
    %%%%%Still need to use position to choose a random position for each submarine
-   fun{InitStateList PortList Positions}
+   fun{InitStateList PortList Spawns}
       local
-	 fun{InitStateList PortList Acc Positions}
+	 fun{InitStateList PortList Acc Spawns}
 	    case PortList of nil then nil
 	    []H|T then
-	       %%%randomgenPosition
-	        {SetState Acc H ??? nil surface(surface:true timeLeft:0) ????? ??????}|{InitSateList T Acc+1 Positions} %%%???a remplacer par les infos a avoir, encore a check
-	    end
+	       %%%randomgenPosition:done
+	       {SetState Acc H Spawns.1 nil surface(surface:true timeLeft:0) null charges(mines:0 missile:0 sonar:0 drone:0)}|{InitStateList T Acc+1 Spawns.2} 
+	    end                                                                                                          
 	 end
       in
 	 case PortList of nil then nil
 	 []H|T then
-	    %%%%%randomgenPosition
-	    {SetState 0 H ??? nil surface(surface:true timeLeft:0) ????? ??????}|{InitStateList T 1 Positions} %%%???a remplacer par les infos a avoir, encore a check
+	    %%%%%randomgenPosition:done
+	    {SetState 0 H Spawns.1 nil surface(surface:true timeLeft:0) null charges(mines:0 missile:0 sonar:0 drone:0)}|{InitStateList T 1 Spawns.2}
 	 end
       end
    end
@@ -56,7 +59,8 @@ in
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
       Positions={AvailablePositions}%position ou il n'y a pas d'iles
-      StateList={InitStateList PortsSubmarines Positions}
+      Spawns={AssignSpawn Positions}% une liste de longueur nbPlayers de spawns generes aleatoirement
+      StateList={InitStateList PortsSubmarines Spawns}
       {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn 
       %{Send WindowPort drawMine(1|1|nil)}
       {System.show 'PickRandom Test'}
