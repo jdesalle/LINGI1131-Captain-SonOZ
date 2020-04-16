@@ -15,8 +15,38 @@ define
    Positions
    AssignSpawn
    PickRandom
-   
+ 
+   SetState%%%%to set the state
+   InitSateList %%%initiate StateList friom portlist
+   AddMine%%%%add mine in currentmine list
+   checkMine%%%%%check if there is a mine in current position
 in
+   %%%%%create a state from the differents agruments
+   fun{SetState ID Port Position FormerPositions Surface Items Charges}
+      state(id:ID port:Port position:Position formerPos:FormerPositions surface: Surface items:Items charges:Charges)
+   end
+   %%create a list of state from the port open and the availables positions
+   %%%%%Still need to use position to choose a random position for each submarine
+   fun{InitStateList PortList Positions}
+      local
+	 fun{InitStateList PortList Acc Positions}
+	    case PortList of nil then nil
+	    []H|T then
+	       %%%randomgenPosition
+	        {SetState Acc H ??? nil surface(surface:true timeLeft:0) ????? ??????}|{InitSateList T Acc+1 Positions} %%%???a remplacer par les infos a avoir, encore a check
+	    end
+	 end
+      in
+	 case PortList of nil then nil
+	 []H|T then
+	    %%%%%randomgenPosition
+	    {SetState 0 H ??? nil surface(surface:true timeLeft:0) ????? ??????}|{InitStateList T 1 Positions} %%%???a remplacer par les infos a avoir, encore a check
+	 end
+      end
+   end
+   
+		      
+	    
    
 %---------------------Initialisation-----------
  
@@ -25,8 +55,8 @@ in
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
-      IdPlayers={CreateIds PortsSubmarines}
       Positions={AvailablePositions}%position ou il n'y a pas d'iles
+      StateList={InitStateList PortsSubmarines Positions}
       {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn 
       %{Send WindowPort drawMine(1|1|nil)}
       {System.show 'PickRandom Test'}
@@ -48,16 +78,6 @@ in
       {CreatePortSubmarineAAA Input.players Input.colors 1}
    end
 
-%create ids for every player and returns a list of ids
-   fun{CreateIds Ports}
-      case Ports of H|T then
-	 local X in
-	    {Send H getId(X)}%il faut definir getId dans player
-	    X|{CreateIds T}
-	 end
-      []nil then nil
-      end
-   end
 
 %Returns a list of positions pt(x:X y:Y) where there is no island
    %Je suis pas sur que ce soit dans le main qu'il faille le mettre
