@@ -26,9 +26,12 @@ in
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
       IdPlayers={CreateIds PortsSubmarines}
-     % Positions={AvailablePositions}%position ou il n'y a pas d'iles
+      Positions={AvailablePositions}%position ou il n'y a pas d'iles
       {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn 
       %{Send WindowPort drawMine(1|1|nil)}
+      {System.show 'PickRandom Test'}
+      {System.show {PickRandom Positions}}
+      {System.show {AssignSpawn Positions}}
    end
    
 
@@ -89,24 +92,27 @@ in
    %de nouveau je suis pas sur que ce soit dans le main qu'il faille le mettre
    fun{AssignSpawn AvailablePositions}
       fun{AssignSpawnAAA Len Liste}
-	 if Len >0 then {AssignSpawnAAA Len~1 {List.append Liste {PickRandom AvailablePositions}|nil}}
-	 else
-	    Liste.2 %On skippe le 000
-	 end
+	 local Random Acc in
+	    Random={PickRandom AvailablePositions}
+	    Acc={List.append Liste Random|nil}
+	    if Len>0 then {AssignSpawnAAA Len-1 Acc}
+	    else
+	       Liste.2 %On skippe le 000
+	    end
+	 end	
       end      
    in
-      {AssignSpawnAAA nbPlayer 000|nil}
+      {AssignSpawnAAA Input.nbPlayer 000|nil}
    end
-end
    
    %prends un element au hasard dans une liste
-fun{PickRandom Liste}
-   local Num Len in
-      Len={List.length Liste}
-      Num=({OS.rand} mod Len)+1
-      {List.nth Liste Num}%Prends le Num element de la liste
-   end      
-end
+   fun{PickRandom Liste}
+      local Num Len in
+	 Len={List.length Liste}
+	 Num=({OS.rand} mod Len)+1
+	 {List.nth Liste Num}%Prends le Num element de la liste
+      end      
+   end
    
 end
 

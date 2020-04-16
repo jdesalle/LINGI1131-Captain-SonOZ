@@ -35,9 +35,9 @@ in
       of getId(ID)|T then
 	 {System.show 'treating GetId'}
 	 {TreatStream T {GetId State ID}}
-      []initPosition(ID Position)|T then
-	 {System.show 'treating initPosition'}
-	 {TreatStream T {InitPosition ....}
+    %  []initPosition(ID Position)|T then
+%	 {System.show 'treating initPosition'}
+	% {TreatStream T {InitPosition ....}
 
 %Ici il faut traiter le cas pour chaque message que player doit handle.
       end
