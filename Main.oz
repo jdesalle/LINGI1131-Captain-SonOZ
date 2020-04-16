@@ -14,21 +14,23 @@ define
    AvailablePositions
    Positions
    AssignSpawn
+   PickRandom
    
 in
    
 %---------------------Initialisation-----------
  
    thread
+      {System.show 'Yeah Yeah'}
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
-     %{System.show 'yeah'}    
       IdPlayers={CreateIds PortsSubmarines}
-      Positions={AvailablePositions}
+      Positions={AvailablePositions}%position ou il n'y a pas d'iles
       {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn 
       %{Send WindowPort drawMine(1|1|nil)}
-      {System.show {AvailablePositions}} %couille car donne nil alors que ca devrait pas. Je vois pas mon erreur :(
+      {System.show 'lalala'}
+      {System.show ({OS.rand} mod 10)+1}
    end
    
 
@@ -49,46 +51,66 @@ in
    fun{CreateIds Ports}
       case Ports of H|T then
 	 local X in
-	    {Send H getId(X)}
+	    {Send H getId(X)}%il faut definir getId dans player
 	    X|{CreateIds T}
 	 end
       []nil then nil
       end
    end
 
- %WORK IN PROGRESS
 %Returns a list of positions pt(x:X y:Y) where there is no island
+   %Je suis pas sur que ce soit dans le main qu'il faille le mettre
    fun{AvailablePositions}
-      fun{AvailablePositionsAAA Acc X Y List} 
+      fun{AvailablePositionsAAA Acc X Y Result} 
 	 case Acc of H|T then
-	    if X==Input.nColumn then
-	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 List|pt(x:X y:Y)}
+	    if X>=Input.nColumn then
+	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
 	       else
-		  {AvailablePositionsAAA Acc.2 1 Y+1 List}
+		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
 	       end
 	    else
-	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y List|pt(x:X y:Y)}
+	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y {List.append Result pt(x:X y:Y)|nil}}
 	       else
-		  {AvailablePositionsAAA Acc.2 X+1 Y List}
+		  {AvailablePositionsAAA Acc.2 X+1 Y Result}
 	       end
 	    end	        
-	 []nil then (List|nil).2 %on est au bout, on skip le premier element qui est nil
+	 []nil then
+	    Result.2 %on est au bout, on skip le premier element qui est 000
 	 end
       end	  
-   in
-      {AvailablePositionsAAA {List.flatten Input.map} 1 1 nil}
+   in     
+      local Res in
+	 Res={AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
+	 Res
+      end    
    end
       
 
    %TO DO
    %Choisis des positions au hasard parmis la liste. S'assure que les spawns sont suffisament ecartes?
-   %Retourne une liste de la longueur du nombre de joueurs 
+   %Retourne une liste de la longueur du nombre de joueurs
+   %de nouveau je suis pas sur que ce soit dans le main qu'il faille le mettre
    fun{AssignSpawn AvailablePositions}
-      AvailablePositions.1 %A modifier
+      fun{AssignSpawnAAA Len Liste}
+	 if Len >0 then {AssignSpawnAAA Len~1 {PickRandom AvailablePositions}}
+	 else
+	    Liste.2
+	 end
+      in
+	 {AssignSpawnAAA nbPlayer 000|nil}
+      end
    end
-
-
-end
+   
+   %prends un element au hasard dans une liste
+      fun{PickRandom Liste}
+	 local Num Len in
+	    Len={List.length Liste}
+	    Num=({OS.rand} mod Len)+1
+	    {List.nth Liste Num}%Prends le Num element de la liste
+	 end      
+      end
+   
+   end
 
 
 

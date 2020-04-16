@@ -1,6 +1,7 @@
 functor
 import
    Input
+   System
 export
    portPlayer:StartPlayer
 define
@@ -33,8 +34,11 @@ in
       of getId(ID)|T then
 	 {System.show 'treating GetId'}
 	 {TreatStream T {GetId State ID}}
+      []initPosition(ID Position)|T then
+	 {System.show 'treating initPosition'}
+	 {TreatStream T {InitPosition ....}
 
-%Ici il faut traiter le cas pour chaque fonction de player..
+%Ici il faut traiter le cas pour chaque message que player doit handle.
       end
    end
    fun{StartPlayer Color ID}
@@ -47,7 +51,9 @@ in
       end
       Port
    end
-    
+
+
+   %useless for now
    fun {GetId State ID}
       ID=State.id
       {System.show 'executing GetId'}
