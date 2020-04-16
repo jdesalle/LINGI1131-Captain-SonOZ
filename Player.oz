@@ -14,6 +14,7 @@ define
    ChargeItem
    FireItem
    FireMine
+   GetId
    IsDead
    SayMove
    SaySurface
