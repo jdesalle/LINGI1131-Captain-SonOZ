@@ -14,7 +14,6 @@ define
    ChargeItem
    FireItem
    FireMine
-   GetId
    IsDead
    SayMove
    SaySurface
@@ -54,10 +53,5 @@ in
    end
 
 
-   %useless for now
-   fun {GetId State ID}
-      ID=State.id
-      {System.show 'executing GetId'}
-      State
-   end  
+
 end
