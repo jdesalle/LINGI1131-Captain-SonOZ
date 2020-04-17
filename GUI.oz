@@ -274,7 +274,8 @@ in
       [] lifeUpdate(ID Life)|T then
 	 {TreatStream T Grid {StateModification Grid ID State {UpdateLife Life}}}
 	 {TreatStream T Grid State}
-      [] putMine(ID Position)|T then 
+      [] putMine(ID Position)|T then
+	 {System.show 'Drawing Mine'}
 	 {TreatStream T Grid {StateModification Grid ID State {DrawMine Position}}}
       [] removeMine(ID Position)|T then
 	 {TreatStream T Grid {StateModification Grid ID State {RemoveMine Position}}}
@@ -290,32 +291,6 @@ in
 	 {TreatStream T Grid State}
       [] _|T then
 	 {TreatStream T Grid State}
-	 %-------------------------Ajouts par nous------------------
-      []sayMove(ID Direction)|T then
-	 skip
-      []saySurface(ID)|T then
-	 skip
-      []sayCharge(ID KindItem)|T then
-	 skip
-      []sayMinePlaced(ID)|T then
-	 skip
-      []sayMissileExplode(ID Position Message)|T then
-	 skip
-      []sayMineExplode(ID Position Message|T) then
-	 skip
-      []sayPassingDrone(Drone ID Answer)|T then
-	 skip
-      []sayAnswerDrone(Drone ID Answer)|T then
-	 skip
-      []sayPassingSonar(ID Answer)|T then
-	 skip
-      []sayAnswerSonar(ID Answer)|T then
-	 skip
-      []sayDeath(ID)|T then
-	 skip
-      []sayDamageTaken(ID Damage LifeLeft)|T then
-	 skip
-    
       end
    end
 end

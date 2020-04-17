@@ -1,4 +1,6 @@
-
-*.ozf
-*.ozf
+GUI.ozf
+Input.ozf
+PlayerManager.ozf
+Player.ozf
+Main.ozf
 *.ozf

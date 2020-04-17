@@ -63,11 +63,9 @@ in
       StateList={InitStateList PortsSubmarines Spawns}
       {System.show 'StateList and above Initialized'}
      % {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn. FAILS because IdPlayer not defin
-      {Send WindowPort drawMine(1|1|nil)}
-      {System.show 'PickRandom Test'}
-      {System.show {PickRandom Positions}}
-      {System.show {AssignSpawn Positions}}
-     %{Send WindowPort sayMove(1 'east')} Not working yet
+      {Send WindowPort putMine(1 pt(x:1 y:1))}%does nothing idk why
+      {Send PortsSubmarines.1 sayMove(1 'east')}
+      {System.show 'Reached end of main thread sucessfully'}
    end
    
 
