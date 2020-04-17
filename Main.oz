@@ -22,6 +22,10 @@ define
    InitStateList %%%initiate StateList friom portlist
    AddMine%%%%add mine in currentmine list
    CheckMine%%%%%check if there is a mine in current position
+
+   %%Partie tour par tour
+   PartieTT
+   Tour
 in
    %%%%%create a state from the differents agruments
    fun{SetState ID Port Position FormerPositions Surface Items Charges}
@@ -144,14 +148,38 @@ end
 
 %---------------Jeu-------------
    
- %   if(Input.isTurnByTurn) then
- %      %trucs pour le turn by turn
+    if(Input.isTurnByTurn) then
+      local
+	 fun{PartieTT StateList}
+	    local
+	       fun{giveTurn ToCompute StateList}
+		  case ToCompute of nil then SateList
+		  []H|T then {giveTurn T {Turn H StateList}}
+		  end
+	       end
+	    in
+	       case StateList of nil then skip%%%fin partie
+	       []H|nil then skip %%fin partie avec H= vainqueur
+	       []H|T then
+		  {PartieTT {GiveTurn T {Turn H StateList}}}
+%%%{Turn H Statelist} make the tour of submarine of state H and send an updated StateList
+		  %%Give turn Aply Turn to each State of The remaining state list and return the updated Statelist
+	       end
+	    end
+	 end
+      in
+	 {PartieTT StateList}
+      end
+    
+    
+		  
       
- %   else 
- % %Trucs pour le simultane
-  
- %   end
+    else 
+ %Trucs pour le simultane
+       skip
+    end
 
+    
 
 
 
