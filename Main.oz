@@ -21,7 +21,7 @@ define
    SetState%%%%to set the state
    InitStateList %%%initiate StateList friom portlist
    AddMine%%%%add mine in currentmine list
-   checkMine%%%%%check if there is a mine in current position
+   CheckMine%%%%%check if there is a mine in current position
 in
    %%%%%create a state from the differents agruments
    fun{SetState ID Port Position FormerPositions Surface Items Charges}
