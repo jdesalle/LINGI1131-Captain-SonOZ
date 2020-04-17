@@ -1,0 +1,3 @@
+declare
+Test=nil
+{Browse Test==nil}

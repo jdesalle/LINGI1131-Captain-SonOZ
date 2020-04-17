@@ -16,13 +16,16 @@ define
    AssignSpawn
    PickRandom
    Spawns
-
+   %%%StateFunction
    StateList
    SetState%%%%to set the state
-   InitStateList %%%initiate StateList friom portlist
-   AddMine%%%%add mine in currentmine list
-   CheckMine%%%%%check if there is a mine in current position
+   InitStateList %%%initiate StateList from portlist
+   UpdatePosDir
+   UpdateSurf
+   UpdateItem
 
+
+   Broadcast
    %%Partie tour par tour
    PartieTT
    Tour
@@ -30,6 +33,22 @@ in
    %%%%%create a state from the differents agruments
    fun{SetState ID Port Position FormerPositions Surface Items Charges}
       state(id:ID port:Port position:Position formerPos:FormerPositions surface:Surface items:Items charges:Charges)
+   end
+   fun{UpdatePosDir ID Direction StateList}
+      case StateList of nil then Statelist%%%no modification, invalid Id maybe put an error message
+      []H|T then
+	 if H.id==ID then
+	    case Direction of east then
+	       {SetState H.id H.port position(H.}
+	    []north
+	    []south
+	    []west
+	    end
+	    
+	 else
+	 end
+      end
+      
    end
    
    %%create a list of state from the port open and the availables positions
@@ -143,37 +162,77 @@ in
    end
    
 end
+proc{Broadcast Message StateList}
+   case StateList of nil then skip
+   []H|T then
+      {Send H.port Message}
+      {Broadcast Message T}
+   end
+end
+
+fun{Turn State StateList}
+   if State.surface.surface==true && State.surface.turnLeft>0 then
+      StateList
+   end
+   if State.formerPos = nil then
+      {Send State.port dive}
+   end
+   local
+      Position Direction
+   in
+      {Send State.port move(State.id Position Direction)}
+      if Direction==Surface then
+	 {Broadcast saySurface(State.id) Statelist}
+	 {UpdateSurf State.id Statelist}
+	 StateList
+      end
+      {Broadcast sayMove(State.id Direction} StateList}
+      {UpdatePosDir State.id Direction StateList}
+   end
+   local
+      KindItem
+      in 
+      {Send State.port charge(State.id KindItem)}
+      if KindItem \= null then
+	 {UpdateItem State.id KindItem StateList}
+	 {Broadcast sayCharge(State.id KindItem)}
+      end
+   end
+   %%%%%%%En Cours
+	 
+end
 
 
 
 %---------------Jeu-------------
    
-    if(Input.isTurnByTurn) then
-      local
-	 fun{PartieTT StateList}
-	    local
-	       fun{giveTurn ToCompute StateList}
-		  case ToCompute of nil then SateList
-		  []H|T then {giveTurn T {Turn H StateList}}
-		  end
-	       end
-	    in
-	       case StateList of nil then skip%%%fin partie
-	       []H|nil then skip %%fin partie avec H= vainqueur
-	       []H|T then
-		  {PartieTT {GiveTurn T {Turn H StateList}}}
-%%%{Turn H Statelist} make the tour of submarine of state H and send an updated StateList
-		  %%Give turn Aply Turn to each State of The remaining state list and return the updated Statelist
+
+if(Input.isTurnByTurn) then
+   local
+      fun{PartieTT StateList}
+	 local
+	    fun{GiveTurn ToCompute StateList}
+	       case ToCompute of nil then StateList
+	       []H|T then {giveTurn T {Turn H StateList}}
 	       end
 	    end
+	 in
+	    case StateList of nil then skip%%%fin partie
+	    []H|nil then skip %%fin partie avec H= vainqueur
+	    []H|T then
+	       {PartieTT {GiveTurn T {Turn H StateList}}}
+%%%{Turn H Statelist} make the tour of submarine of state H and send an updated StateList
+	       %%Give turn Aply Turn to each State of The remaining state list and return the updated Statelist
+	    end
 	 end
-      in
-	 {PartieTT StateList}
-      end  
-    else 
+      end
+   in
+      {PartieTT StateList}
+   end  
+else 
  %Trucs pour le simultane
-       skip
-    end
+   skip
+end
 
     
 
