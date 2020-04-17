@@ -169,11 +169,7 @@ end
 	 end
       in
 	 {PartieTT StateList}
-      end
-    
-    
-		  
-      
+      end  
     else 
  %Trucs pour le simultane
        skip
