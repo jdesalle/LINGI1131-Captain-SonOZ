@@ -54,18 +54,20 @@ in
 %---------------------Initialisation-----------
  
    thread
-     % {System.show 'Yeah Yeah'}
+      {System.show 'Main Thread Started'}
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
       Positions={AvailablePositions}%position ou il n'y a pas d'iles
       Spawns={AssignSpawn Positions}% une liste de longueur nbPlayers de spawns generes aleatoirement
       StateList={InitStateList PortsSubmarines Spawns}
-      {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn 
-      %{Send WindowPort drawMine(1|1|nil)}
+      {System.show 'StateList and above Initialized'}
+     % {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn. FAILS because IdPlayer not defin
+      {Send WindowPort drawMine(1|1|nil)}
       {System.show 'PickRandom Test'}
       {System.show {PickRandom Positions}}
       {System.show {AssignSpawn Positions}}
+     %{Send WindowPort sayMove(1 'east')} Not working yet
    end
    
 
