@@ -39,17 +39,22 @@ in
       []H|T then
 	 if H.id==ID then
 	    case Direction of east then
-	       {SetState H.id H.port position(H.}
-	    []north
-	    []south
-	    []west
+	       {SetState H.id H.port position(H.position.x H.postion.y+1) H.position|H.formerPos H.surface H.items H.Charges}
+	    []north then
+	       {SetState H.id H.port position(H.position.x-1 H.postion.y) H.position|H.formerPos H.surface H.items H.Charges}
+	    []south then
+	       {SetState H.id H.port position(H.position.x+1 H.postion.y) H.position|H.formerPos H.surface H.items H.Charges}
+	    []west then
+	       {SetState H.id H.port position(H.position.x H.postion.y-1) H.position|H.formerPos H.surface H.items H.Charges}
+	    []_ then %%%ici, ce sera le cas ou il s'agit d'une mauvaise direction, on ignore simplement, eventuellement un message d'erreur
+	       StateList
 	    end
-	    
 	 else
+	    {UpdatePosDir ID Direction T}
 	 end
       end
-      
    end
+   
    
    %%create a list of state from the port open and the availables positions
    %%%%%Still need to use position to choose a random position for each submarine
