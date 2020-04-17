@@ -240,6 +240,11 @@ in
       end
    end
 
+
+
+
+
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    fun{StartWindow}
@@ -285,6 +290,32 @@ in
 	 {TreatStream T Grid State}
       [] _|T then
 	 {TreatStream T Grid State}
+	 %-------------------------Ajouts par nous------------------
+      []sayMove(ID Direction)|T then
+	 skip
+      []saySurface(ID)|T then
+	 skip
+      []sayCharge(ID KindItem)|T then
+	 skip
+      []sayMinePlaced(ID)|T then
+	 skip
+      []sayMissileExplode(ID Position Message)|T then
+	 skip
+      []sayMineExplode(ID Position Message|T) then
+	 skip
+      []sayPassingDrone(Drone ID Answer)|T then
+	 skip
+      []sayAnswerDrone(Drone ID Answer)|T then
+	 skip
+      []sayPassingSonar(ID Answer)|T then
+	 skip
+      []sayAnswerSonar(ID Answer)|T then
+	 skip
+      []sayDeath(ID)|T then
+	 skip
+      []sayDamageTaken(ID Damage LifeLeft)|T then
+	 skip
+    
       end
    end
 end
