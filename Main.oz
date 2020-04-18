@@ -181,7 +181,7 @@ in
 	 {Broadcast Message T}
       end
    end
-
+   
    fun{Turn State StateList}
       if State.surface.timeLeft>0 then
 	 StateList
@@ -190,29 +190,36 @@ in
 	    {Send State.port dive}
 	 end
 	 local
-	    Position Direction
+	    Position Direction StateMove
 	 in
 	    {Send State.port move(State.id Position Direction)}
 	    if Direction== surface then
 	       {Broadcast saySurface(State.id) StateList}
 	       {UpdateSurf State.id StateList} %updatesurf pas encore codé, pour el moment aucun changement dans la statelist
-	    else
+	    else 
 	       {Broadcast sayMove(State.id Direction) StateList}
-	       {UpdatePosDir State.id Direction StateList}
-	    
+	       StateMove={UpdatePosDir State.id Direction StateList}
 	       local
-		  KindItem
+		  KindItem StateItem
 	       in 
-		  {Send State.port charge(State.id KindItem)}
+		     {Send State.port charge(State.id KindItem)}
 		  if KindItem \= null then
-		     {UpdateItem State.id KindItem StateList}
-		     {Broadcast sayCharge(State.id KindItem)}
+		     StateItem={UpdateItem State.id KindItem StateList}
+		     {Broadcast sayCharge(State.id KindItem) StateList}
+		  else
+		     StateItem=StateMove
+		  end
+		  local
+		     Stateshoot
+		  in
+		     StateItem
 		  end
 	       end
 	    end
 	 end
       end
    end
+   
 %%%%%%%En Cours
 	 
 
@@ -223,6 +230,7 @@ in
   % thread%J'ai rajoute un thread, pas sur qu'il faille je crois pas, a moins qu'a un moment on implémente la possibilité de jouer plusieur partie, et alors il serait avant
    if(Input.isTurnByTurn) then
       local
+	 Result
 	 fun{PartieTT StateList}
 	    local
 	       fun{GiveTurn ToCompute StateList}
@@ -241,7 +249,7 @@ in
 	    end
 	 end
       in
-	 {PartieTT StateList}
+	 Result={PartieTT StateList}
       end  
    else 
  %Trucs pour le simultane
