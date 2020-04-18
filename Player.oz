@@ -28,6 +28,7 @@ define
    SayDeath
    SayDamageTaken
 in
+   %PARSE ERROR a cause des arguments de treatStream, normal comme pas defini
    proc{TreatStream Stream <p1> <p2> ...} % as as many parameters as you want
         % ...
       case Stream
@@ -72,53 +73,50 @@ in
 	 if ID== null then skip
 	 else
 	    {TreatStream T {SayMove ID Direction}}
-	    endp
-	 []sayAnswerDrone(Drone ID Answer)|T then
-	    if ID== null then skip
-	    else
-	       {TreatStream T {SayMove ID Direction}}
-	    end
-	 []sayPassingSonar(ID Answer)|T then
-	    if ID== null then skip
-	    else
-	       {TreatStream T {SayMove ID Direction}}
-	    end
-	 []sayAnswerSonar(ID Answer)|T then
-	    if ID== null then skip
-	    else
-	       {TreatStream T {SayMove ID Direction}}
-	    end
-	 
-	 []sayDeath(ID)|T then
-	    if ID== null then skip
-	    else
-	       {TreatStream T {SayMove ID Direction}}
-	    end
-	 []sayDamageTaken(ID Damage LifeLeft)|T then
-	    if ID== null then skip
-	    else
-	       {TreatStream T {SayMove ID Direction}}
-	    end
 	 end
-      end
-
-   %A FINIR POUR L'INITIALISATION
-      fun{StartPlayer Color ID}
-	 Stream
-	 Port
-      in
-	 {NewPort Stream Port}
-	 thread
-	    {TreatStream Stream <p1> <p2> ...}
+      []sayAnswerDrone(Drone ID Answer)|T then
+	 if ID== null then skip
+	 else
+	    {TreatStream T {SayMove ID Direction}}
 	 end
-	 Port
-      end
-
-%-------Fonctions pour les messages
-      fun{SayMove ID Direction}
-	     {System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
+      []sayPassingSonar(ID Answer)|T then
+	 if ID== null then skip
+	 else
+	    {TreatStream T {SayMove ID Direction}}
+	 end
+      []sayAnswerSonar(ID Answer)|T then
+	 if ID== null then skip
+	 else
+	    {TreatStream T {SayMove ID Direction}}
+	 end	 
+      []sayDeath(ID)|T then
+	 if ID== null then skip
+	 else
+	    {TreatStream T {SayMove ID Direction}}
+	 end
+      []sayDamageTaken(ID Damage LifeLeft)|T then
+	 if ID== null then skip
+	 else
+	    {TreatStream T {SayMove ID Direction}}
+	 end
       end
    end
 
+   %A FINIR POUR L'INITIALISATION
+   fun{StartPlayer Color ID}
+      Stream
+      Port
+   in
+      {NewPort Stream Port}
+      thread
+	 {TreatStream Stream <p1> <p2> ...}
+      end
+      Port
+   end
 
+%-------Fonctions pour les messages
+   fun{SayMove ID Direction}
+      {System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
+   end
 end
+
