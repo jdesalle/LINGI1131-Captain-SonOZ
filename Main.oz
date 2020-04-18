@@ -28,7 +28,6 @@ define
    Broadcast
    %%Partie tour par tour
    PartieTT
-   Tour%useless?
    Turn
 in
 %%%%%create a state from the differents agruments
@@ -54,6 +53,14 @@ in
 	    {UpdatePosDir ID Direction T}
 	 end
       end
+   end
+   fun{UpdateSurf ID StateList}
+%%%%TO DO
+      StateList
+   end
+   fun{UpdateItem ID KindItem StateList}
+%%%%%%TO DO
+      StateList
    end
    
    
@@ -176,36 +183,36 @@ in
    end
 
    fun{Turn State StateList}
-      if State.surface.surface==true && State.surface.timeLeft>0 then
+      if State.surface.timeLeft>0 then
 	 StateList
-      end
-      if State.formerPos = nil then
-	 {Send State.port dive}
-      end
-      local
-	 Position Direction
-      in
-	 {Send State.port move(State.id Position Direction)}
-	 case Direction of surface then
-	% if Direction==Surface then remplace par case sinon fonctionne pas
-	    {Broadcast saySurface(State.id) StateList}
-	% {UpdateSurf State.id Statelist} updateSurf est pas encore defini
-	    StateList
+      else
+	 if State.formerPos == nil then
+	    {Send State.port dive}
 	 end
-	 {Broadcast sayMove(State.id Direction) StateList}
-	 {UpdatePosDir State.id Direction StateList}
-      end
-      local
-	 KindItem
-      in 
-	 {Send State.port charge(State.id KindItem)}
-	 if KindItem \= null then
-	    {UpdateItem State.id KindItem StateList}
-	    {Broadcast sayCharge(State.id KindItem)}
+	 local
+	    Position Direction
+	 in
+	    {Send State.port move(State.id Position Direction)}
+	    if Direction== surface then
+	       {Broadcast saySurface(State.id) StateList}
+	       {UpdateSurf State.id StateList} %updatesurf pas encore codé, pour el moment aucun changement dans la statelist
+	    else
+	       {Broadcast sayMove(State.id Direction) StateList}
+	       {UpdatePosDir State.id Direction StateList}
+	    
+	       local
+		  KindItem
+	       in 
+		  {Send State.port charge(State.id KindItem)}
+		  if KindItem \= null then
+		     {UpdateItem State.id KindItem StateList}
+		     {Broadcast sayCharge(State.id KindItem)}
+		  end
+	       end
+	    end
 	 end
       end
    end
-   
 %%%%%%%En Cours
 	 
 
@@ -213,41 +220,39 @@ in
 
 %---------------Jeu-------------
    
-   thread%J'ai rajoute un thread, pas sur qu'il faille
-      if(Input.isTurnByTurn) then
-	 local
-	    fun{PartieTT StateList}
-	       local
-		  fun{GiveTurn ToCompute StateList}
-		     case ToCompute of nil then StateList
-		     []H|T then {GiveTurn T {Turn H StateList}}
-		     end
-		  end
-	       in
-		  case StateList of nil then skip%%%fin partie
-		  []H|nil then skip %%fin partie avec H= vainqueur
-		  []H|T then
-		     {PartieTT {GiveTurn T {Turn H StateList}}}
-%%%{Turn H Statelist} make the tour of submarine of state H and send an updated StateList
-		     %%Give turn Aply Turn to each State of The remaining state list and return the updated Statelist
+  % thread%J'ai rajoute un thread, pas sur qu'il faille je crois pas, a moins qu'a un moment on implémente la possibilité de jouer plusieur partie, et alors il serait avant
+   if(Input.isTurnByTurn) then
+      local
+	 fun{PartieTT StateList}
+	    local
+	       fun{GiveTurn ToCompute StateList}
+		  case ToCompute of nil then StateList
+		  []H|T then {GiveTurn T {Turn H StateList}}
 		  end
 	       end
+	    in
+	       case StateList of nil then StateList%%%fin partie
+	       []H|nil then StateList %%fin partie avec H= vainqueur
+	       []H|T then
+		  {PartieTT {GiveTurn T {Turn H StateList}}}
+%%%{Turn H Statelist} make the tour of submarine of state H and send an updated StateList
+		  %%Give turn Aply Turn to each State of The remaining state list and return the updated Statelist
+	       end
 	    end
-	 in
-	    {PartieTT StateList}
-	 end  
-      else 
+	 end
+      in
+	 {PartieTT StateList}
+      end  
+   else 
  %Trucs pour le simultane
-	 skip
-      end
+      skip
    end
-
    
+
+
 end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
 
     
-
-
 
 
 

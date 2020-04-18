@@ -1,9 +1,18 @@
 declare
-fun {Add R}
-   case R of nil then 0
-   []test(First Second)then
-      First+Second
+fun{Test A B}
+   if A==5 then
+      A
+   
+   else
+      local
+	 Sum 
+      in
+	 Sum=A+B
+      end
+      A+B
    end
 end
 
-{Browse {Add test(1 2)}}
+
+{Browse {Test 5 3}}
+{Browse {Test 3 3}}
