@@ -193,53 +193,51 @@ in
 	    {ModifState null state.charges Position surface(surface:true time:Input.turnSurface)}
 	 end 
       end
+   end
+   
 
    %----------------------------------------------------------------   
    %-------------Autres Fonctions------------------------------------------
    %-----------------------------------------------------------------
-      fun{ModifState PastPositions Charges CurrentPosition Surface}
-	 state(pastPosition:PastPositions charges:Charges currentPosition:CurrentPosition surface:Surface)
-      end
+   fun{ModifState PastPositions Charges CurrentPosition Surface}
+      state(pastPosition:PastPositions charges:Charges currentPosition:CurrentPosition surface:Surface)
+   end
 
 
    
    %Returns a list of positions pt(x:X y:Y) where there is no island
-      fun{AvailablePositions}
-	 fun{AvailablePositionsAAA Acc X Y Result} 
-	    case Acc of H|T then
-	       if X>=Input.nColumn then
-		  if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
-		  else
-		     {AvailablePositionsAAA Acc.2 1 Y+1 Result}
-		  end
+   fun{AvailablePositions}
+      fun{AvailablePositionsAAA Acc X Y Result} 
+	 case Acc of H|T then
+	    if X>=Input.nColumn then
+	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
 	       else
-		  if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y {List.append Result pt(x:X y:Y)|nil}}
-		  else
-		     {AvailablePositionsAAA Acc.2 X+1 Y Result}
-		  end
-	       end	        
-	    []nil then
-	       Result.2 %on est au bout, on skip le premier element qui est 000
-	    end
-	 end	  
-      in     
-	 local Res in
-	    Res={AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
-	    Res
-	 end    
-      end
+		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
+	       end
+	    else
+	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y {List.append Result pt(x:X y:Y)|nil}}
+	       else
+		  {AvailablePositionsAAA Acc.2 X+1 Y Result}
+	       end
+	    end	        
+	 []nil then
+	    Result.2 %on est au bout, on skip le premier element qui est 000
+	 end
+      end	  
+   in     
+      local Res in
+	 Res={AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
+	 Res
+      end    
+   end
       
    %prends un element au hasard dans une liste
-      fun{PickRandom Liste}
-	 local Num Len in
-	    Len={List.length Liste}
-	    Num=({OS.rand} mod Len)+1
-	    {List.nth Liste Num}%Prends le Num element de la liste
-	 end      
-      end
-
-
-
-
-
+   fun{PickRandom Liste}
+      local Num Len in
+	 Len={List.length Liste}
+	 Num=({OS.rand} mod Len)+1
+	 {List.nth Liste Num}%Prends le Num element de la liste
+      end      
    end
+
+end
