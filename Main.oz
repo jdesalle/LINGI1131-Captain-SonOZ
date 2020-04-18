@@ -71,7 +71,7 @@ in
 	 fun{InitStateList PortList Acc Spawns}
 	    case PortList of nil then nil
 	    []H|T then
-%%%randomgenPosition:done
+%%%randomgenPosition:done %COUILLE avec les spawns, c'est le player qui les gere, il faut changer ca ici.
 	       {SetState Acc H Spawns.1 nil surface(surface:true timeLeft:0) null charges(mines:0 missile:0 sonar:0 drone:0)}|{InitStateList T Acc+1 Spawns.2} 
 	    end                                                                                                          
 	 end
