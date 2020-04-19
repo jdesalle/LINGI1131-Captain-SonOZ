@@ -23,9 +23,11 @@ define
    UpdatePosDir
    UpdateSurf
    UpdateItem
-
-
+   UpdateFire
+   UpdateMine
+   
    Broadcast
+   BroadcastFire
    %%Partie tour par tour
    PartieTT
    Turn
@@ -62,7 +64,14 @@ in
 %%%%%%TO DO
       StateList
    end
-   
+   fun{UpdateFire ID KindFire StateList}
+%%%%%%%TO DO
+      StateList
+   end
+   fun{UpdateMine ID Mine StateList}
+%%%%%TO DO
+      StateList
+   end   
    
    %%create a list of state from the port open and the availables positions
 %%%%%Still need to use position to choose a random position for each submarine
@@ -71,7 +80,7 @@ in
 	 fun{InitStateList PortList Acc Spawns}
 	    case PortList of nil then nil
 	    []H|T then
-%%%randomgenPosition:done %COUILLE avec les spawns, c'est le player qui les gere, il faut changer ca ici.
+%%%randomgenPosition:done %COUILLE avec les spawns, c'est le player qui les gere, il faut changer ca ici-> on va retirer le Sapwn d'ici et modifier la fonction d'appel, ca devrai "vite" se corriger .
 	       {SetState Acc H Spawns.1 nil surface(surface:true timeLeft:0) null charges(mines:0 missile:0 sonar:0 drone:0)}|{InitStateList T Acc+1 Spawns.2} 
 	    end                                                                                                          
 	 end
@@ -181,6 +190,10 @@ in
 	 {Broadcast Message T}
       end
    end
+   proc{BroadcastFire KindFire StateList}
+      %% TO DO
+      {Broadcast KindFire StateList}%%%%not the real proc
+   end
    
    fun{Turn State StateList}
       if State.surface.timeLeft>0 then
@@ -204,15 +217,32 @@ in
 	       in 
 		     {Send State.port charge(State.id KindItem)}
 		  if KindItem \= null then
-		     StateItem={UpdateItem State.id KindItem StateList}
+		     StateItem={UpdateItem State.id KindItem StateMove}
 		     {Broadcast sayCharge(State.id KindItem) StateList}
 		  else
 		     StateItem=StateMove
 		  end
 		  local
-		     Stateshoot
+		     StateFire KindFire
 		  in
-		     StateItem
+		     {Send State.port fireItem(State.id KindFire)}
+		     if KindFire \= null then
+			StateFire={UpdateFire State.id KindFire StateItem}
+			{BroadcastFire KindFire StateList}
+		     else
+			StateFire=StateItem
+		     end
+		     local
+			StateMine Mine Message
+		     in
+			if Mine \=null then
+			   StateMine={UpdateMine State.id Mine StateFire}
+			   {Broadcast sayMineExplode(State.id Mine Message) StateItem}
+			else
+			   StateMine=StateFire
+			end
+			StateMine%%%renvoit de l'état final après toute les étape du tour.
+		     end
 		  end
 	       end
 	    end
