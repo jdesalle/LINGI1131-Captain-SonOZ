@@ -29,13 +29,14 @@ define
    SayDeath
    SayDamageTaken
    %Added By me
-   PlayerID=1
+   PlayerID %assignes par la fonction startplayer qui est appellee par le playerGenerator qui est lui meme appelle quand on cree les ports dans le main
+   PlayerColor 
    ModifState
    AvailablePositions
    PickRandom
    Spawn
    PositionsAva
-   BindID
+   ManhattanDistance
 in
 
    thread
@@ -134,12 +135,14 @@ in
    %----------------------------------------------------
    %------------Fonctions Initialisation----------------
    %----------------------------------------------------
-   fun{StartPlayer Color ID}
+   fun{StartPlayer Color ID}%Ici l'ID et la couleur sont deja assignes par le player generator, on peut les recuperer
       Stream
       Port
    in
       {NewPort Stream Port}
       thread
+	 PlayerColor=Color
+	 PlayerID=ID
 	 {TreatStream Stream nil}
       end
       Port
@@ -163,6 +166,38 @@ in
       State
    end
 
+   fun{SaySurface ID State}
+      {System.show 'Player of ID:'#ID#'is surfacing!'}
+      State
+   end
+
+   fun{SayCharge ID KindItem State}
+      {System.show 'Player of ID:'#ID#' has charged '#KindItem#'!' }
+      State
+   end
+
+   fun{SayMinePlaced ID State}
+      {System.show 'Player of ID:'#ID#' has placed a mine somewhere!'}
+      State
+   end
+
+
+   fun{SayMissileExplode ID Position Message State}
+      local Dis in
+	 Dis={ManhattanDistance State Position}
+	 if State.life-Dis<=0 then
+	    Message=sayDeath(ID)
+	 else Message=Dis
+	 end
+	 {System.show Message}
+	 State
+      end
+   end
+
+   fun{SaySurface ID State}
+      {System.show 'Player of ID:'#ID#'is surfacing!'}
+      State
+   end
 
    %----------------------------------------------
    %-----Fonctions pour les actions:--------------
@@ -170,7 +205,7 @@ in
    %Si on peut aller a droite on y va, sinon on monte, sinon on va a gauche, sinon on descend, sinon on surface.
    %retourne le nouveau state
    fun{Move ID Position Direction State}
-      {BindID ID}
+      ID=PlayerID
       local CurrentX CurrentY in
 	 CurrentX=State.currentPosition.x
 	 CurrentY=State.currentPosition.y
@@ -201,7 +236,7 @@ in
 
    %Si on peut charger on charge le missile en premier, sinon la mine, sinon le drone, sinon le sonar.
    fun{ChargeItem ID KindItem State}
-      {BindID ID}
+      ID=PlayerID
       if State.charges.missile+1<Input.missile then
 	 KindItem=missile
 	 {ModifState State.pastPositions State.items charges(missile:State.charges.missile+1 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines}
@@ -231,7 +266,7 @@ in
 
    %On tire d'abord un missile, si on a pas ce sera une mine, un drone et puis un sonar et sinon rien. On tire a une position random
    fun{FireItem ID KindFire State}
-      {BindID ID}
+      ID=PlayerID
       local CanFire in
 	 fun{CanFire Item State}
 	    State.items.Item >0
@@ -261,7 +296,7 @@ in
    %makes a previously placed mine explode
    %Si on a une ou plusieur mines on en fait exploser une au hasard.
    fun{FireMine ID Mine State}
-      {BindID ID}
+      ID=PlayerID
       case State.placedMines of H|T then
 	 Mine={PickRandom T}
 	 {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine}}
@@ -270,8 +305,6 @@ in
 	 State
       end
    end
-
-
 
 
 
@@ -286,20 +319,29 @@ in
    %----------------------------------------------------------------
    %-------------Autres Fonctions------------------------------------------
    %-----------------------------------------------------------------
-   proc{BindID ID}
-      if {Value.isFree ID} then ID=PlayerID
-      else
-	 skip
-      end
-   end
-
 
 
    fun{ModifState PastPositions Items Charges CurrentPosition Surface PlacedMines}
       state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines)
    end
 
-
+   %return the manathan distance between the current position and anotherPosition
+   fun{ManhattanDistance State Position}
+      local Xsub Ysub Xex Yex Distance in
+	 Xsub=State.currentPosition.x
+	 Ysub=State.currentPosition.y
+	 Xex=Position.x
+	 Yex=Position.y
+	 Distance={Number.abs Xsub-Xex}+{Number.abs Ysub-Yex}
+	 if Distance >=2 then null
+	 elseif Distance==1 then 1
+	 else	    
+	    2
+	 end
+      end  
+   end
+   
+   
 
    %Returns a list of positions pt(x:X y:Y) where there is no island
    fun{AvailablePositions}

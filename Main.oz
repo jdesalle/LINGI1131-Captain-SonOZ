@@ -115,7 +115,7 @@ in
    
 
    %%------------Fonctions-initialisation-----
-   %create port for every player
+   %create port for every player (submarine)
    fun{CreatePortSubmarine}
       fun{CreatePortSubmarineAAA Subs Colors ID}
 	 case Subs of _|_ then
@@ -124,7 +124,7 @@ in
 	 end
       end
    in
-      {CreatePortSubmarineAAA Input.players Input.colors 1}
+      {CreatePortSubmarineAAA Input.players Input.colors 1} %couille ici avec les couleurs et les id, c'est lee player generator qui les assigne donc a priori pas besoin d'eux ici?
    end
 
 
