@@ -20,81 +20,81 @@ define
    StateList
    SetState%%%%to set the state
    InitStateList %%%initiate StateList from portlist
-   UpdatePosDir
    UpdateSurf
-   UpdateItem
-   UpdateFire
-   UpdateMine
+   Alive
+   
    
    Broadcast
    BroadcastFire
+   BroadcastMine
    %%Partie tour par tour
    PartieTT
+   PartieSS
    Turn
 in
 %%%%%create a state from the differents agruments
-   fun{SetState ID Port Position FormerPositions Surface Items Charges}
-      state(id:ID port:Port position:Position formerPos:FormerPositions surface:Surface items:Items charges:Charges)
+   fun{SetState ID Port Surface}
+      state(id:ID port:Port surface:Surface)
    end
-   fun{UpdatePosDir ID Direction StateList}
-      case StateList of nil then StateList%%%no modification, invalid Id maybe put an error message
+   
+   fun{UpdateSurf ID StateList}
+      case StateList of nil then nil
       []H|T then
-	 if H.id==ID then
-	    case Direction of east then
-	       {SetState H.id H.port position(H.position.x H.position.y+1) H.position|H.formerPos H.surface H.items H.charges}
-	    []north then
-	       {SetState H.id H.port position(H.position.x-1 H.position.y) H.position|H.formerPos H.surface H.items H.charges}
-	    []south then
-	       {SetState H.id H.port position(H.position.x+1 H.position.y) H.position|H.formerPos H.surface H.items H.charges}
-	    []west then
-	       {SetState H.id H.port position(H.position.x H.position.y-1) H.position|H.formerPos H.surface H.items H.charges}
-	    []_ then %%%ici, ce sera le cas ou il s'agit d'une mauvaise direction, on ignore simplement, eventuellement un message d'erreur
-	       StateList
+	 if H.id==ID
+	    if H.surface.timelef==0 then
+	       {SetState H.id H.port surface(surface:true timeLeft:Input.TurnSurface)}|T
+	    else
+	       {SetState H.id H.port surface(surface:true timeLeft:H.surface.timeLeft-1)}|T
 	    end
 	 else
-	    {UpdatePosDir ID Direction T}
+	    H|{UpdateSurf ID T}
 	 end
       end
    end
-   fun{UpdateSurf ID StateList}
-%%%%TO DO
-      StateList
-   end
-   fun{UpdateItem ID KindItem StateList}
-%%%%%%TO DO
-      StateList
-   end
-   fun{UpdateFire ID KindFire StateList}
-%%%%%%%TO DO
-      StateList
-   end
-   fun{UpdateMine ID Mine StateList}
-%%%%%TO DO
-      StateList
-   end   
-   
-   %%create a list of state from the port open and the availables positions
-%%%%%Still need to use position to choose a random position for each submarine
-   fun{InitStateList PortList Spawns}
+   fun{Alive StateList Deads}
       local
-	 fun{InitStateList PortList Acc Spawns}
-	    case PortList of nil then nil
+	 fun{CheckDead ID Deads}
+	    case Deads of nil then false
 	    []H|T then
-%%%randomgenPosition:done %COUILLE avec les spawns, c'est le player qui les gere, il faut changer ca ici-> on va retirer le Sapwn d'ici et modifier la fonction d'appel, ca devrai "vite" se corriger .
-	       {SetState Acc H Spawns.1 nil surface(surface:true timeLeft:0) null charges(mines:0 missile:0 sonar:0 drone:0)}|{InitStateList T Acc+1 Spawns.2} 
-	    end                                                                                                          
+	       if ID==H.id then true
+	       else
+		  false
+	       end
+	    end
+	 end
+      in
+	 case StateList of nil then nil
+	 []H|T then
+	    if {CheckDead ID Deads}==true then
+	       T
+	    else
+	       H|{Alive T Deads}
+	    end
+	 end
+      end
+   end
+   
+   
+   
+   
+   %%create a list of state from the open ports %%%maybe have to modify this one for the ID? 
+   fun{InitStateList PortList}
+      local
+	 fun{InitStateList Acc PortList}
+	    case portList of nil then nil
+	    []H|T then
+	       {SetState Acc H surface(surface:true timeLeft:0)}|{InitStateList Acc+1 T}
+	    end
 	 end
       in
 	 case PortList of nil then nil
 	 []H|T then
-%%%%%randomgenPosition:done
-	    {SetState 0 H Spawns.1 nil surface(surface:true timeLeft:0) null charges(mines:0 missile:0 sonar:0 drone:0)}|{InitStateList T 1 Spawns.2}
+	    {SetState 0 H surface(surface:true timeLeft:0)}|{InitStateList 1 T}
 	 end
       end
    end
-   
 		      
-	    
+   
    
 %---------------------Initialisation-----------
  
@@ -103,9 +103,7 @@ in
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
       PortsSubmarines={CreatePortSubmarine}
-      Positions={AvailablePositions}%position ou il n'y a pas d'iles
-      Spawns={AssignSpawn Positions}% une liste de longueur nbPlayers de spawns generes aleatoirement
-      StateList={InitStateList PortsSubmarines Spawns}
+      StateList={InitStateList PortsSubmarines}
       {System.show 'StateList and above Initialized'}
      % {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn. FAILS because IdPlayer not defin
       {Send WindowPort putMine(1 pt(x:1 y:1))}%does nothing idk why
@@ -113,7 +111,7 @@ in
       {System.show 'Reached end of main thread sucessfully'}
    end
    
-
+   
    %%------------Fonctions-initialisation-----
    %create port for every player (submarine)
    fun{CreatePortSubmarine}
@@ -126,7 +124,7 @@ in
    in
       {CreatePortSubmarineAAA Input.players Input.colors 1} %couille ici avec les couleurs et les id, c'est lee player generator qui les assigne donc a priori pas besoin d'eux ici?
    end
-
+   
 
 %Returns a list of positions pt(x:X y:Y) where there is no island
    %Je suis pas sur que ce soit dans le main qu'il faille le mettre
@@ -154,8 +152,8 @@ in
 	 Res
       end    
    end
-      
-
+   
+   
    %Choisis des positions au hasard parmis la liste de positions sans iles
    %Retourne une liste de la longueur du nombre de joueurs
    %de nouveau je suis pas sur que ce soit dans le main qu'il faille le mettre
@@ -190,11 +188,14 @@ in
 	 {Broadcast Message T}
       end
    end
-   proc{BroadcastFire KindFire StateList}
+   fun{BroadcastFire KindFire StateList}
       %% TO DO
-      {Broadcast KindFire StateList}%%%%not the real proc
+      StateList
    end
-   
+   fun{BroadcastMine StateList}
+      StateList
+   end
+
    fun{Turn State StateList}
       if State.surface.timeLeft>0 then
 	 StateList
@@ -215,7 +216,7 @@ in
 	       local
 		  KindItem StateItem
 	       in 
-		     {Send State.port charge(State.id KindItem)}
+		  {Send State.port charge(State.id KindItem)}
 		  if KindItem \= null then
 		     StateItem={UpdateItem State.id KindItem StateMove}
 		     {Broadcast sayCharge(State.id KindItem) StateList}
