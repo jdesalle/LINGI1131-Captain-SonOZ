@@ -1,4 +1,6 @@
 functor
+   %TODO AJOUTER A CHAQUE STATE l'ARGUMENT ennemyStateList:EnnemyState, implementer les fonctions dans fireITem et FireMine
+   %Verifier l'initilisation correcte
 import
    Input
    System
@@ -44,7 +46,7 @@ define
    FindPlayerPosition
    FindMissilePosition
    FindMineToDetonate
-   EditOtherPlayersState
+   EditEnnemyStateList
 in
 
    thread
@@ -52,9 +54,8 @@ in
       Spawn={PickRandom PositionsAva}% un spawn choisi au hasard
    end
 
-
-
-   % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life otherPlayersState:OtherPlayersStateList)
+)
+   % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life ennemyStateList:ennemyState(id:ID direction:DirectionList)|...|nil)
    proc{TreatStream Stream State}
       case Stream of initPosition(ID Position)|T then
 	 {System.show 'treating initPosition'}
@@ -77,7 +78,7 @@ in
       %--------------Messages-
 
       []sayMove(ID Direction)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null or ID==PlayerID then {TreatStream T State}
 	 else
 	    {TreatStream T {SayMove ID Direction State}}
 	 end
@@ -170,7 +171,7 @@ in
    fun{InitPosition ?ID ?Position}
       ID=PlayerID
       Position=Spawn
-      {ModifState nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage}
+      {ModifState nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage nil}
       %le premier tour on est surface et au tour suivant on peut dive Verifier que le surface time est correct.
    end
 
@@ -188,9 +189,7 @@ in
    end
    
    fun{SayMove ID Direction State}
-      ID=PlayerID
-      {System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
-      State
+      {EditEnnemyStateList State ID Direction}
    end
 
    fun{SaySurface ID State}
@@ -402,8 +401,8 @@ in
    %-----------------------------------------------------------------
 
 
-   fun{ModifState PastPositions Items Charges CurrentPosition Surface PlacedMines Life}
-      state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life)
+   fun{ModifState PastPositions Items Charges CurrentPosition Surface PlacedMines Life EnnemyStateList}
+      state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life ennemyStateList:EnnemyStateList)
    end
 
    %return damage taken by the submarine at the current the position from the explosion at located at Position.
@@ -596,12 +595,26 @@ in
       end 
    end
 
+   % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life EnnemyStateList:ennemyState(id:ID direction:DirectionList)|..|nil)
+  % ennemyState(id:ID direction:DirectionsList)
+   fun{EditEnnemyStateList State ID Direction} % On aura une liste de ces etats, qui contient les etats pour chaque joueur
+      local IsId IsNotId Temp NewListTemp NewEnnemyState NewList
+      in
+	 fun{IsId EnnemyState}
+	    if EnnemyState.id==ID then true
+	    else
+	       false
+	    end
+	    
+	 end
+	 
+	 fun{IsNotId EnnemyState}
+	    if EnnemyState.id==ID then false
+	    else
+	       true
+	    end
+	 end
 
-   %STILL HAVE TO FIGURE OUT THIS-----------------------------------------
-   % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life otherPlayersState:OtherPlayersStateList)
-  % otherPlayerState(id:ID directions:Directions isAlive:IsAlive)
-   fun{EditOtherPlayersState State ID DirectionToAdd IsAlive} % On aura une liste de ces etats, qui contient les etats pour chaque joueur
-      local ModifiedOtherPlayerState IsInStateList in
 	 fun{IsInStateList ID List} %To check if player is in stateList
 	    case List of H|T then
 	       if List.1.id==ID then true
@@ -611,33 +624,31 @@ in
 	    []nil then false
 	    end
 	 end
-
-	 if {IsInStateList ID State.otherPlayersState} then
-	    %...Il faudrait retirer de la liste
-
-	 else
-	    {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life {List.append State.otherPlayersState ModifiedOtherPlayerState}}
-	 end
 	 
-	    
-	 if IsAlive then
-	    case DirectionToAdd of surface then %On decide de ne pas enregistrer surface car on s'en sert pas mais on pourrait le faire facilement ici
-	       ModifiedOtherPlayerState=otherPlayerState(id:OtherPlayerState.id directions:OtherPlayerState.directions isAlive:OtherPlayerState.isAlive)
-	    
-	    []_ then
-	       ModifiedOtherPlayerState=otherPlayerState(id:OtherPlayerState.id directions:{List.append OtherPlayerState.directions DirectionToAdd|nil} isAlive:OtherPlayerState.isAlive)
-	    end	 
+	 if {IsInStateList ID State.ennemyStateList}==true
+         %si l'id du player auquel on veut ajouter une direction est dans la EnnemyStateList on le vire de la liste.
+	 %On le stocke dans Temp et on stocke le reste de la liste dans Temporary
+	    Temp={List.filter State.EnnemyStateList IsId}
+	    Temporary={List.filter State.EnnemyStateList IdNotId}
+	    NewEnnemyState=ennemyState(id:Temp.id direction:{List.append Temp.direction Direction|nil})
+	    NewEnnemyStateList={List.append Temporary NewEnnemyState|nil}
+	    {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface State.placedMines State.life NewEnnemyStateList}
 	 else
-	    ModifiedOtherPlayerState= otherPlayerState(id:OtherPlayerState.id directions:nil isAlive:false)
+	    NewEnnemyState=ennemyState(id:ID direction:Direction|nil)
+	    {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface State.placedMines State.life {List.append State.ennemyStateList NewEnnemyState|nil}}
 	 end
-	
-      end
-      
+      end 
    end
+      
+  % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life otherPlayersState:OtherPlayersStateList)
+end
+   
 
-  
-  
+
+
 
 
  
-end
+
+  
+  
