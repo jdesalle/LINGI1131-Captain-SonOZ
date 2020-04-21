@@ -481,7 +481,7 @@ in
 	 end
 	 
 	 case KindItem of mine then
-	    {List.filter PositionsAva MineBool} %retourne la liste des elements qui satisfont la fonction {MineBool Element}
+	    {List.filter PositionsAva MineBool} %retourne la liste des elements qui satisfont la fonction {MineBool Element} parmis les positions sans iles.
 	 []missile then
 	    {List.filter PositionsAva MissBool}
 	 end
