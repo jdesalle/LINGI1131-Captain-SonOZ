@@ -186,6 +186,7 @@ in
       []H|T then
 	 {Send H.port Message}
 	 {Broadcast Message T}
+	 %%%%%%ici case of pour GUI
       end
    end
    fun{BroadcastFire KindFire StateList}
@@ -193,56 +194,51 @@ in
       StateList
    end
    fun{BroadcastMine StateList}
+      %%% TO DO
       StateList
    end
 
-   fun{Turn State StateList}
+   fun{Turn State StateList S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
-	 StateList
+	 result(surface:true deads:nil)
       else
-	 if State.formerPos == nil then
+	 if State.surface.surface==true then
 	    {Send State.port dive}
 	 end
 	 local
-	    Position Direction StateMove
+	    Position Direction
 	 in
 	    {Send State.port move(State.id Position Direction)}
 	    if Direction== surface then
 	       {Broadcast saySurface(State.id) StateList}
-	       {UpdateSurf State.id StateList} %updatesurf pas encore codé, pour el moment aucun changement dans la statelist
+	       result(surface:true deads:nil)
 	    else 
 	       {Broadcast sayMove(State.id Direction) StateList}
-	       StateMove={UpdatePosDir State.id Direction StateList}
 	       local
 		  KindItem StateItem
 	       in 
 		  {Send State.port charge(State.id KindItem)}
 		  if KindItem \= null then
-		     StateItem={UpdateItem State.id KindItem StateMove}
 		     {Broadcast sayCharge(State.id KindItem) StateList}
-		  else
-		     StateItem=StateMove
 		  end
 		  local
-		     StateFire KindFire
+		     KindFire Dead1
 		  in
 		     {Send State.port fireItem(State.id KindFire)}
 		     if KindFire \= null then
-			StateFire={UpdateFire State.id KindFire StateItem}
-			{BroadcastFire KindFire StateList}
+			Dead1={BroadcastFire KindFire StateList}
 		     else
-			StateFire=StateItem
+			Dead1=nil
 		     end
 		     local
-			StateMine Mine Message
+			Mine Message
 		     in
 			if Mine \=null then
-			   StateMine={UpdateMine State.id Mine StateFire}
-			   {Broadcast sayMineExplode(State.id Mine Message) StateItem}
+			   Dead={BroadcastMine Mine {Alive Statelist Dead1}}
 			else
-			   StateMine=StateFire
+			   Dead=Dead1
 			end
-			StateMine%%%renvoit de l'état final après toute les étape du tour.
+			   result(surface:false deads:Dead)
 		     end
 		  end
 	       end
@@ -251,7 +247,13 @@ in
       end
    end
    
-%%%%%%%En Cours
+   
+   fun{PartieTT}
+
+   end
+   fun{PartieSS}
+   end
+   
 	 
 
 
@@ -260,31 +262,9 @@ in
    
   % thread%J'ai rajoute un thread, pas sur qu'il faille je crois pas, a moins qu'a un moment on implémente la possibilité de jouer plusieur partie, et alors il serait avant
    if(Input.isTurnByTurn) then
-      local
-	 Result
-	 fun{PartieTT StateList}
-	    local
-	       fun{GiveTurn ToCompute StateList}
-		  case ToCompute of nil then StateList
-		  []H|T then {GiveTurn T {Turn H StateList}}
-		  end
-	       end
-	    in
-	       case StateList of nil then StateList%%%fin partie
-	       []H|nil then StateList %%fin partie avec H= vainqueur
-	       []H|T then
-		  {PartieTT {GiveTurn T {Turn H StateList}}}
-%%%{Turn H Statelist} make the tour of submarine of state H and send an updated StateList
-		  %%Give turn Aply Turn to each State of The remaining state list and return the updated Statelist
-	       end
-	    end
-	 end
-      in
-	 Result={PartieTT StateList}
-      end  
+      {PartieTT StateList}
    else 
- %Trucs pour le simultane
-      skip
+      {PartieSS StateList
    end
    
 
