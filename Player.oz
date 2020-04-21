@@ -37,6 +37,7 @@ define
    Spawn
    PositionsAva
    ManhattanDistance
+   PositionsInRange
 in
 
    thread
@@ -46,85 +47,95 @@ in
 
 
 
-   % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface)
-   proc{TreatStream Stream State} % as as many parameters as you want
+   % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life)
+   proc{TreatStream Stream State}
       case Stream of initPosition(ID Position)|T then
 	 {System.show 'treating initPosition'}
-	 {TreatStream T {InitPosition ID Position}}
+	 {TreatStream T {InitPosition ?ID ?Position}}
 
 
-	 %----------------Actions---------Work in progress...
+	 %----------------Actions--------
       []move(ID Position Direction)|T then
-	 {TreatStream T {Move ID Position Direction State}}
+	 {TreatStream T {Move ?ID ?Position ?Direction State}}
       []dive|T then
 	 {TreatStream T {Dive State}}
       []chargeItem(ID KindItem)|T then
-	 {TreatStream T {ChargeItem ID KindItem State}}
+	 {TreatStream T {ChargeItem ?ID ?KindItem State}}
       []fireItem(ID KindFire)|T then
-	 {TreatStream T {FireItem ID KindFire State}}
+	 {TreatStream T {FireItem ?ID ?KindFire State}}
       []fireMine(ID Mine)|T then
-	 {TreatStream T {FireMine ID Mine State}}
+	 {TreatStream T {FireMine ?ID ?Mine State}}
       []isDead(Answer)|T then
-	 skip
-      %--------------Messages--WIP
+	 {TreatStream T {IsDead ?Answer State}}
+      %--------------Messages-
 
       []sayMove(ID Direction)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SayMove ID Direction State}}
 	 end
       []saySurface(ID)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SaySurface ID State}}
 	 end
       []sayCharge(ID KindItem)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SayCharge ID KindItem State}}
 	 end
       []sayMinePlaced(ID)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SayMinePlaced ID State}}
 	 end
       []sayMissileExplode(ID Position Message)|T then
-	 if ID== null then skip
+	 if ID== null then
+	    Message=null
+	    {TreatStream T State}
 	 else
-	    {TreatStream T {SayMissileExplode ID Position Message State}}
+	    {TreatStream T {SayMissileExplode ID Position ?Message State}}
 	 end
       []sayMineExplode(ID Position Message)|T then
-	 if ID== null then skip
+	 if ID== null then
+	    Message=null
+	    {TreatStream T State}
 	 else
-	    {TreatStream T {SayMineExplode ID Position Message State}}
+	    {TreatStream T {SayMineExplode ID Position ?Message State}}
 	 end
       []sayPassingDrone(Drone ID Answer)|T then
-	 if ID== null then skip
+	 if State.life=<0 then %Je suis pas sur pour ceci qu'il faille bind Answer a null aussi
+	    ID=null
+	    Answer=null
+	    {TreatStream T State}
 	 else
-	    {TreatStream T {SayPassingDrone Drone ID Answer State}}
+	    {TreatStream T {SayPassingDrone Drone ?ID ?Answer State}}
 	 end
       []sayAnswerDrone(Drone ID Answer)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SayAnswerDrone Drone ID Answer State}}
 	 end
       []sayPassingSonar(ID Answer)|T then
-	 if ID== null then skip
+	 if State.life=<0 then %Je suis pas sur pour ceci qu'il faille bind Answer a null aussi
+	    ID=null
+	    Answer=null
+	    {TreatStream T State}
 	 else
-	    {TreatStream T {SayPassingSonar ID Answer State}}
+	    {TreatStream T {SayPassingSonar ?ID ?Answer State}}
 	 end
       []sayAnswerSonar(ID Answer)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SayAnswerSonar ID Answer State}}
 	 end
       []sayDeath(ID)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SayDeath ID State}}
 	 end
       []sayDamageTaken(ID Damage LifeLeft)|T then
-	 if ID== null then skip
+	 if ID== null then {TreatStream T State}
 	 else
 	    {TreatStream T {SayDamageTaken ID Damage LifeLeft State}}
 	 end
@@ -135,7 +146,7 @@ in
    %----------------------------------------------------
    %------------Fonctions Initialisation----------------
    %----------------------------------------------------
-   fun{StartPlayer Color ID}%Ici l'ID et la couleur sont deja assignes par le player generator, on peut les recuperer
+   fun{StartPlayer Color ID}%Ici l'ID et la couleur sont deja assignes par le player generator, on peut les recuperer je pense. Sinon ca couille mon player
       Stream
       Port
    in
@@ -149,17 +160,26 @@ in
    end
 
 
-   fun{InitPosition ID Position}
+   fun{InitPosition ?ID ?Position}
       ID=PlayerID
       Position=Spawn
       {ModifState nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage}
-      %le premier tour on est surface et au tour suivant on peut dive?
+      %le premier tour on est surface et au tour suivant on peut dive Verifier que le surface time est correct.
    end
 
 
    %-------------------------------------------------
    %-------Fonctions pour les messages:--------------
    %-------------------------------------------------
+   fun{IsDead ?Answer State}
+      if State.life=<0 then Answer=true
+	 State
+      else
+	 Answer=false
+	 State
+      end     
+   end
+   
    fun{SayMove ID Direction State}
       ID=PlayerID
       {System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
@@ -182,7 +202,7 @@ in
    end
 
 
-   fun{SayMissileExplode ID Position Message State}
+   fun{SayMissileExplode ID Position ?Message State}
       local Dis in
 	 Dis={ManhattanDistance State Position}
 	 if State.life - Dis =<0 then
@@ -195,7 +215,7 @@ in
       end
    end
 
-   fun{SayMineExplode ID Position Message State} %probablement moyen de le traiter dans le case of au lieu de repeter 2 fois
+   fun{SayMineExplode ID Position ?Message State} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
       local Dis in
 	 Dis={ManhattanDistance State Position}
 	 if State.life-Dis=<0 then
@@ -207,9 +227,9 @@ in
       end
    end
 
-   fun{SayPassingDrone Drone ID Answer State}
+   fun{SayPassingDrone Drone ?ID ?Answer State}
       ID=PlayerID
-      case Drone of drone(row x) then
+      case Drone of drone(row x) then %Je suis pas sur que le case of drone(row x) soit syntaxiquement correct. A tester.
 	 if Drone.row==State.currentPosition.x then Answer=true
 	 else Answer=false
 	 end	 
@@ -237,12 +257,13 @@ in
       State
    end
 
-   fun{SayPassingSonar ID Answer State}
+   %On renvoie notre position avec au hasard soit x soit y qui est correct. La position incorrecte est generee au hasard
+   fun{SayPassingSonar ?ID ?Answer State}
       ID=PlayerID
       if ({OS.rand}mod 2)+1 == 1 then
-	 Answer=pt(x:State.currentPosition.x y:({OS.rand} mod Input.nColumn)+1)
+	 Answer=pt(x:State.currentPosition.x y:({OS.rand} mod Input.nRow)+1)
       else
-	 Answer=pt(x:({OS.rand} mod Input.nRow)+1 y:State.currentPosition.y)
+	 Answer=pt(x:({OS.rand} mod Input.nColumn)+1 y:State.currentPosition.y)
       end
       State
    end
@@ -259,7 +280,7 @@ in
    %----------------------------------------------
    %Si on peut aller a droite on y va, sinon on monte, sinon on va a gauche, sinon on descend, sinon on surface.
    %retourne le nouveau state
-   fun{Move ID Position Direction State}
+   fun{Move ?ID ?Position ?Direction State}
       ID=PlayerID
       local CurrentX CurrentY in
 	 CurrentX=State.currentPosition.x
@@ -290,7 +311,7 @@ in
    end
 
    %Si on peut charger on charge le missile en premier, sinon la mine, sinon le drone, sinon le sonar.
-   fun{ChargeItem ID KindItem State}
+   fun{ChargeItem ?ID ?KindItem State}
       ID=PlayerID
       if State.charges.missile+1<Input.missile then
 	 KindItem=missile
@@ -320,19 +341,19 @@ in
    end
 
    %On tire d'abord un missile, si on a pas ce sera une mine, un drone et puis un sonar et sinon rien. On tire a une position random
-   fun{FireItem ID KindFire State}
+   fun{FireItem ?ID ?KindFire State}
       ID=PlayerID
       local CanFire in
 	 fun{CanFire Item State}
 	    State.items.Item >0
 	 end
 	 if {CanFire 'missile' State} then
-	    KindFire=missile({PickRandom PositionsAva})
+	    KindFire=missile({PickRandom {PositionsInRange missile PositionsAva State}})%ducoup on peut se tirer sur soi meme  
 	    {ModifState State.pastPositions items(missile:State.items.missile-1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 elseif {CanFire 'mine' State} then
 	    local MinePosition in
-	       MinePosition={PickRandom PositionsAva}
-	       KindFire=mine(MinePosition) %Strategie pourrie mais en theorie on arrive pas la car on charge toujours le missile en premier et si c'est charge un le tire...
+	       MinePosition={PickRandom {PositionsInRange mine PositionsAva State}}
+	       KindFire=mine(MinePosition) %Strategie pourrie mais en theorie on arrive pas la car on charge toujours le missile en premier et si c'est charge on le tire...
 	       {ModifState State.pastPositions items(missile:State.items.missile mine:State.items.mine-1 sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface {List.append State.placedMines MinePosition|nil} State.life}
 	    end
 	 elseif {CanFire 'drone' State} then
@@ -350,9 +371,9 @@ in
 
    %makes a previously placed mine explode
    %Si on a une ou plusieur mines on en fait exploser une au hasard.
-   fun{FireMine ID Mine State}
+   fun{FireMine ?ID ?Mine State}
       ID=PlayerID
-      case State.placedMines of H|T then
+      case State.placedMines of _|T then %le premier element de placedMines est toujours nil
 	 Mine={PickRandom T}
 	 {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life}
       []nil then
@@ -380,7 +401,8 @@ in
       state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life)
    end
 
-   %return the manathan distance between the current position and anotherPosition
+   %return damage taken by the submarine at the current the position from the explosion at located at Position.
+   %Damage is calculated proportionnally to the manhattanDistance
    fun{ManhattanDistance State Position}
       local Xsub Ysub Xex Yex Distance in
 	 Xsub=State.currentPosition.x
@@ -401,7 +423,7 @@ in
    %Returns a list of positions pt(x:X y:Y) where there is no island
    fun{AvailablePositions}
       fun{AvailablePositionsAAA Acc X Y Result}
-	 case Acc of H|T then
+	 case Acc of _|_ then
 	    if X>=Input.nColumn then
 	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
 	       else
@@ -433,4 +455,36 @@ in
       end
    end
 
+   %returns a list of positions where the item can be fired
+   fun{PositionsInRange KindItem PositionsAva State}
+      local Distance MineBool MissBool in
+	 fun{Distance Position}% donne la manhattan distance entre la position actuelle et Position
+	    Distance={Number.abs State.currentPosition.x-Position.x}+{Number.abs State.currentPosition.y-Position.y}
+	 end
+
+	 fun{MineBool Pos}%retoune true si la mine peut etre placee a la position pos
+	    local Dist={Distance Pos} in
+	       if Dist>=Input.minDistanceMine andthen Dist =<Input.maxDistanceMine then true
+	       else
+		  false
+	       end    
+	    end
+	 end
+
+	 fun{MissBool Pos}
+	    local Dist={Distance Pos} in
+	       if Dist>=Input.minDistanceMissile andthen Dist =<Input.maxDistanceMissile then true
+	       else
+		  false
+	       end    
+	    end
+	 end
+	 
+	 case KindItem of mine then
+	    {List.filter PositionsAva MineBool} %retourne la liste des elements qui satisfont la fonction {MineBool Element}
+	 []missile then
+	    {List.filter PositionsAva MissBool}
+	 end
+      end
+   end
 end
