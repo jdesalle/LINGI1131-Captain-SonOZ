@@ -183,7 +183,6 @@ in
    end
    
    fun{SayMove ID Direction State}
-      ID=PlayerID
       {System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
       State
    end
