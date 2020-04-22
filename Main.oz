@@ -22,6 +22,8 @@ define
    InitStateList %%%initiate StateList from portlist
    UpdateSurf
    Alive
+   ProcessStream
+   GetFinalState
    
    
    Broadcast
@@ -41,7 +43,7 @@ in
       case StateList of nil then nil
       []H|T then
 	 if H.id==ID
-	    if H.surface.timelef==0 then
+	    if H.surface.timeLeft==0 then
 	       {SetState H.id H.port surface(surface:true timeLeft:Input.TurnSurface)}|T
 	    else
 	       {SetState H.id H.port surface(surface:true timeLeft:H.surface.timeLeft-1)}|T
@@ -94,6 +96,8 @@ in
       end
    end
 		      
+   
+ 
    
    
 %---------------------Initialisation-----------
@@ -197,7 +201,16 @@ in
       %%% TO DO
       StateList
    end
-
+   fun{ProcessStream Stream}
+      Stream
+      %%TO DO
+   end
+   fun{GetFinalState Stream}
+      case Stream of nil then nil
+      []H|nil then H
+      []H|T then {GetFinalState T}
+   end
+   
    fun{Turn State StateList S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
 	 result(surface:true deads:nil)
@@ -248,11 +261,56 @@ in
    end
    
    
-   fun{PartieTT}
-
+   fun{PartieTT StateList}
+      local
+	 fun {GetTurn Current StateList}
+	    case StateList of nil then {PartieTT StateList}
+	    []H|T then
+	       local Result Surf in
+		  Result= {Turn H StateList}
+		  if Result.surface= true then
+		     Surf={UpdateSurf H.ID StateList}
+		  else
+		     Surf=StateList
+		  end
+		  {GetTurn {Alive T} {Alive Surf}}
+	       end
+	    end
+	 end
+      in
+	 case StateList of nil then nil
+	 []H|nil then H
+	 []H|T then
+	    {GetTurn StateList StateList}
+	 end
+      end
    end
-   fun{PartieSS}
+   fun{PartieSS StateList}
+      local
+	 Stream Stream2
+      in
+	 local
+	    fun{OpenThreads Current StateList}
+	       case StateList of nil then nil
+	       []H|T then
+		  thread
+		     {Turn H StateList}|{OpenThreads T StateList} 
+		  end
+	       end
+	    end
+	 in
+	    case SateList of nil then nil
+	    []H|T then
+	       Stream={OpenThreads StateList StateList}
+	       thread
+		  Stream2={ProcessStream Stream StateList}
+	       end
+	       {PartieSS {GetFinalState Stream2}}
+	    end
+	 end
+      end
    end
+   
    
 	 
 
@@ -261,43 +319,13 @@ in
 %---------------Jeu-------------
    
   % thread%J'ai rajoute un thread, pas sur qu'il faille je crois pas, a moins qu'a un moment on implémente la possibilité de jouer plusieur partie, et alors il serait avant
-   if(Input.isTurnByTurn) then
-      {PartieTT StateList}
-   else 
-      {PartieSS StateList
+   local
+      Winner
+   in
+      if(Input.isTurnByTurn) then
+	 Winner={PartieTT StateList}
+      else 
+	 Winner={PartieSS StateList}
+      end
    end
-   
-
-
 end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
