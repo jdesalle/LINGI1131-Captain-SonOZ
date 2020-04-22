@@ -79,7 +79,7 @@ in
 	 else
 	    {TreatStream T {ChargeItem ?ID ?KindItem State}}
 	 end
-	  
+
       []fireItem(ID KindFire)|T then
 	 if State.life=<0 then
 	    ID=null
@@ -93,7 +93,7 @@ in
 	    {TreatStream T State}
 	 else
 	    {TreatStream T {FireMine ?ID ?Mine State}}
-	 end	  
+	 end
       []isDead(Answer)|T then
 	 {TreatStream T {IsDead ?Answer State}}
       %--------------Messages-
@@ -170,7 +170,7 @@ in
 	 end
       end
    end
-   
+
 
    %----------------------------------------------------
    %------------Fonctions Initialisation----------------
@@ -370,14 +370,14 @@ in
    %On tire d'abord un missile, si on a pas ce sera une mine, un drone et puis un sonar et sinon rien. On tire a une position random
    fun{FireItem ?ID ?KindFire State}
       ID=PlayerID
-      local CanFire PositionsInRange PositionsToChooseFrom FirePosition in
+      local CanFire PositionInRange PositionsToChooseFrom FirePosition in
 	 fun{CanFire Item State}
 	    State.items.Item >0
 	 end
 	 if {CanFire 'missile' State} then %si on a un missile on tente de le tirer, si ca marche pas on tire rien
-	    PositionsInRange={PositionsInRange missile PositionsAva State}
+	    PositionInRange={PositionsInRange missile PositionsAva State}
 	    PositionsToChooseFrom={FindPlayerPosition PositionsAva {PickRandom State.ennemyStateList}.direction}
-	    FirePosition={FindMissileFirePosition PositionsToChooseFrom PositionsInRange State true 1}%On s'autorise a prendre 1 degat quand on tire
+	    FirePosition={FindMissileFirePosition PositionsToChooseFrom PositionInRange State true 1}%On s'autorise a prendre 1 degat quand on tire
 	    if FirePosition.fire==true then
 	       KindFire=missile(FirePosition.where)
 	       {ModifState State.pastPositions items(missile:State.items.missile-1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
@@ -385,7 +385,7 @@ in
 	       KindFire=null
 	       State
 	    end
-	    
+
 	 elseif {CanFire 'mine' State} then %si on a pas de missile on tente de poser une mine au hasard autour de nous
 	    local MinePosition in
 	       MinePosition={PickRandom {PositionsInRange mine PositionsAva State}}
@@ -410,17 +410,17 @@ in
    fun{FireMine ?ID ?Mine State}
       ID=PlayerID
       case State.placedMines of _|_ then
-	 local PositionsToChooseFrom in	       
+	 local PositionsToChooseFrom in
 	    PositionsToChooseFrom={FindPlayerPosition PositionsAva {PickRandom State.ennemyStateList}.direction} %on choisi un joueur a tuer au hasard parmis ceux qu'on a enregistre
 	    Mine={FindMineToDetonate State PositionsToChooseFrom false 1} %on dit qu'on ne veut pas se tirer sur nous meme
-	    {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life State.ennemyStateList}   
+	    {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life State.ennemyStateList}
 	 end
       []nil then
 	 Mine=null
 	 State
       end
    end
-   
+
    fun{Dive State}
       {ModifState nil State.items State.charges State.currentPosition surface(surface:false time:0) State.placedMines State.life State.ennemyStateList}
    end
@@ -528,50 +528,59 @@ in
    %PlayerState est la liste des directions prises par le joueur (surface peut pas etre dedans car alors la liste devient vide)
    fun{FindPlayerPosition PositionsAvailable DirectionList}
       local NewPoint in
-	 %IN:Point ou on veut tester si le sous marin ennemi peut etre
-	 %OUT: true si le sous marin peut etre la avec l'info qu'on a false sinon
+      %IN:Point ou on veut tester si le sous marin ennemi peut etre
+      %OUT: true si le sous marin peut etre la avec l'info qu'on a false sinon
 	 fun{NewPoint TestPoint}
-	    case {List.reverse DirectionList} of H|T then %on retourne la liste car on veut voir si le path emprunte peut mener au point, et pas ou va le sous marin
-	       case H of west then
-		  if {List.Member pt(x:TestPoint.x+1 y:TestPoint.y) PositionsAvailable} then
-		     {NewPoint T pt(x:TestPoint.x+1 y:TestPoint.y)} %si c'est west ca veut dire que le player a bouge a gauche donc on fait aller le point a droite
-		  else
-		     false
-		  end
-	       []east then
-		  if {List.Member pt(x:TestPoint.x-1 y:TestPoint.y) PositionsAvailable} then
-		     {NewPoint T pt(x:TestPoint.x-1 y:TestPoint.y)}
-		  else
-		     false
-		  end
-	       []south then
-		  if {List.Member pt(x:TestPoint.x y:TestPoint.y-1) PositionsAvailable} then
-		     {NewPoint T pt(x:TestPoint.x y:TestPoint.y-1)}%quand le joueur descend il augmente son y de 1 donc on diminue le y de 1
-		  else
-		     false
-		  end
-	       []north then
-		  if {List.Member pt(x:TestPoint.x y:TestPoint.y+1) PositionsAvailable} then
-		     {NewPoint T pt(x:TestPoint.x y:TestPoint.y+1)}
-		  else
-		     false
-		  end
-	       end
-	    []nil then true % on est au bout de la liste, si on a pas deja rendu false on rends true
-	    end
-	 end
+	    local NewPointAAA in
+	    % fonction recursive qui va appliquer le mouvement inverse de DirectionList (donc si c'est east on fait x-1 et pas x+1)
+	    %en partant de l'element le plus recent de la liste de direction donc le dernier (d'ou le liste.reverse) a testPoint. La fonction FindPlayerPosition teste cette la fonction Newpoint sur chaque case de la grille sans ile donc testPoint sera chaque case de la grille.
+	    %A chaque fois qu'on a applique UN mouvement au point on verifie si le mouvement est valide (le point est dans la liste des positionsAvailable). Si c'est le cas on passe a la direction suivante dans la liste des directions et on refait le procede, sinon on renvoie direct false pour ce point
+	       fun{NewPointAAA DirectionList Point}
+		  case{List.reverse DirectionList} of H|T then
+		     case H of west then
+			if {List.Member pt(x:Point.x+1 y:Point.y) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x+1 y:Point.y)}
+			else
+			   false
+			end
+		     []east then
+			if {List.Member pt(x:Point.x-1 y:Point.y) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x-1 y:Point.y)}
+			else
+			   false
+			end
+		     []south then
+			if {List.Member pt(x:Point.x y:Point.y-1) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x y:Point.y-1)}%quand le joueur descend il augmente son y de 1 donc on diminue le y de 1
+			else
+			   false
+			end
+		     []north then
+			if {List.Member pt(x:Point.x y:Point.y+1) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x y:Point.y+1)}
+			else
+			   false
+			end
+		     []nil then true % on est au bout de la liste de directions!
+		     end%fin du case of direction
+		  end%fin du case List.reverse
+	       end%Fin de NewPointAAA
+	       {NewPointAAA DirectionList TestPoint}
+	    end	 %fin du local NewPointAAA
+	 end   %fin de  NewPoint
 	 {List.filter PositionsAvailable NewPoint}
-      end
-   end
+      end%fin du local Newpoint
+   end%Fin de findplayerPosition
+
 
    %trouve ou tirer en fonction de l'item donn�
    %in:item we want to fire (mine or missile) State et si on est autorise a se prendre des degats et de combien
    %out: if we should fire the item and the best position to fire the item. out(fire:Boolean where:Position)
-   fun{FindMissileFirePosition PositionsToChooseFrom PositionsInRange State CanTakeDamage HowMuch}
+   fun{FindMissileFirePosition PositionsToChooseFrom PositionInRange State CanTakeDamage HowMuch}
       local IsInRange InRangeAndProbable WillNotDamage BestOKDamage
       in
 	 fun{IsInRange Point}
-	    {List.Member Point PositionsInRange}
+	    {List.Member Point PositionInRange}
 	 end
 	 %Returns false si le point donne des degats trop importants
 	 %Returns true si le point donne de degats acceptables
@@ -588,7 +597,7 @@ in
 
 	 InRangeAndProbable={List.filter PositionsToChooseFrom IsInRange}
 	 BestOKDamage={List.filter InRangeAndProbable WillNotDamage}
-	 case BestOKDamage of H|T then
+	 case BestOKDamage of _|_ then
 	    out(fire:true where:{PickRandom BestOKDamage})
 	 []nil then out(fire:false where:pt(x:1 y:1))
 	 end
@@ -618,7 +627,7 @@ in
 
 	 UsefulMines={List.filter State.placedMines IsUseful}
 	 BestOKDamage={List.filter UsefulMines WillNotDamage}
-	 case BestOKDamage of H|T then
+	 case BestOKDamage of _|_ then
 	    out(fire:true where:{PickRandom BestOKDamage})
 	 []nil then out(fire:false where:pt(x:1 y:1))
 	 end
@@ -646,7 +655,7 @@ in
 	 end
 
 	 fun{IsInStateList ID List} %To check if player is in stateList
-	    case List of H|T then
+	    case List of _|_ then
 	       if List.1.id==ID then true
 	       else
 		  {IsInStateList ID List.2}
