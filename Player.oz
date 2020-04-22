@@ -58,15 +58,39 @@ in
 
 	 %----------------Actions--------
       []move(ID Position Direction)|T then
-	 {TreatStream T {Move ?ID ?Position ?Direction State}}
+	  if State.life=<0 then
+	    ID=null
+	    {TreatStream T State}
+	 else
+	     {TreatStream T {Move ?ID ?Position ?Direction State}}
+	  end
+	  
       []dive|T then
 	 {TreatStream T {Dive State}}
       []chargeItem(ID KindItem)|T then
-	 {TreatStream T {ChargeItem ?ID ?KindItem State}}
+	  if State.life=<0 then
+	    ID=null
+	    {TreatStream T State}
+	 else
+	     {TreatStream T {ChargeItem ?ID ?KindItem State}}
+	  end
+	  
       []fireItem(ID KindFire)|T then
-	 {TreatStream T {FireItem ?ID ?KindFire State}}
+	  if State.life=<0 then
+	    ID=null
+	    {TreatStream T State}
+	 else
+	     {TreatStream T {FireItem ?ID ?KindFire State}}
+	  end
+	  
       []fireMine(ID Mine)|T then
-	 {TreatStream T {FireMine ?ID ?Mine State}}
+	  if State.life=<0 then
+	    ID=null
+	    {TreatStream T State}
+	 else
+	     {TreatStream T {FireMine ?ID ?Mine State}}
+	  end
+	  
       []isDead(Answer)|T then
 	 {TreatStream T {IsDead ?Answer State}}
       %--------------Messages-
@@ -374,8 +398,8 @@ in
    %Si on a une ou plusieur mines on en fait exploser une au hasard.
    fun{FireMine ?ID ?Mine State}
       ID=PlayerID
-      case State.placedMines of _|T then %le premier element de placedMines est toujours nil
-	 Mine={PickRandom T}
+      case State.placedMines of _|_ then 
+	 Mine={PickRandom State.placedMines}
 	 {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life}
       []nil then
 	 Mine=null
