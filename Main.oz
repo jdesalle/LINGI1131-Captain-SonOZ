@@ -10,7 +10,7 @@ define
    PortsSubmarines
    CreatePortSubmarine
    CreateIds
-   IdPlayers
+   IdPlayersfun	   
    AvailablePositions
    Positions
    AssignSpawn
@@ -42,9 +42,9 @@ in
    fun{UpdateSurf ID StateList}
       case StateList of nil then nil
       []H|T then
-	 if H.id==ID
+	 if H.id==ID then
 	    if H.surface.timeLeft==0 then
-	       {SetState H.id H.port surface(surface:true timeLeft:Input.TurnSurface)}|T
+	       {SetState H.id H.port surface(surface:true timeLeft:Input.turnSurface)}|T
 	    else
 	       {SetState H.id H.port surface(surface:true timeLeft:H.surface.timeLeft-1)}|T
 	    end
@@ -53,6 +53,7 @@ in
 	 end
       end
    end
+ 
    fun{Alive StateList Deads}
       local
 	 fun{CheckDead ID Deads}
@@ -67,8 +68,8 @@ in
       in
 	 case StateList of nil then nil
 	 []H|T then
-	    if {CheckDead ID Deads}==true then
-	       T
+	    if {CheckDead H.id Deads}==true then
+	       {Alive T Deads}
 	    else
 	       H|{Alive T Deads}
 	    end
@@ -197,11 +198,11 @@ in
       %% TO DO
       StateList
    end
-   fun{BroadcastMine StateList}
+   fun{BroadcastMine Mine StateList}
       %%% TO DO
       StateList
    end
-   fun{ProcessStream Stream}
+   fun{ProcessStream Stream StateList}
       Stream
       %%TO DO
    end
@@ -209,6 +210,7 @@ in
       case Stream of nil then nil
       []H|nil then H
       []H|T then {GetFinalState T}
+      end
    end
    
    fun{Turn State StateList S}%%%TODO add thinking if S is true
@@ -244,10 +246,10 @@ in
 			Dead1=nil
 		     end
 		     local
-			Mine Message
+			Mine Message Dead
 		     in
 			if Mine \=null then
-			   Dead={BroadcastMine Mine {Alive Statelist Dead1}}
+			   Dead={BroadcastMine Mine {Alive StateList Dead1}}
 			else
 			   Dead=Dead1
 			end
@@ -267,13 +269,13 @@ in
 	    case StateList of nil then {PartieTT StateList}
 	    []H|T then
 	       local Result Surf in
-		  Result= {Turn H StateList}
-		  if Result.surface= true then
-		     Surf={UpdateSurf H.ID StateList}
+		  Result= {Turn H StateList false}
+		  if Result.surface==true then
+		     Surf={Alive {UpdateSurf H.id StateList} Result.deads}
 		  else
-		     Surf=StateList
+		     Surf={Alive StateList Result.deads}
 		  end
-		  {GetTurn {Alive T} {Alive Surf}}
+		  {GetTurn {Alive T Result.deads} Surf}
 	       end
 	    end
 	 end
@@ -290,22 +292,28 @@ in
 	 Stream Stream2
       in
 	 local
+	    Final
 	    fun{OpenThreads Current StateList}
 	       case StateList of nil then nil
 	       []H|T then
 		  thread
-		     {Turn H StateList}|{OpenThreads T StateList} 
+		     {Turn H StateList true}|{OpenThreads T StateList} 
 		  end
 	       end
 	    end
 	 in
-	    case SateList of nil then nil
+	    case StateList of nil then nil
+	    []H|nil then H
 	    []H|T then
 	       Stream={OpenThreads StateList StateList}
 	       thread
 		  Stream2={ProcessStream Stream StateList}
 	       end
-	       {PartieSS {GetFinalState Stream2}}
+	       thread
+		  Final={GetFinalState Stream2}
+	       end
+	       
+	       {PartieSS Final}
 	    end
 	 end
       end
@@ -328,4 +336,5 @@ in
 	 Winner={PartieSS StateList}
       end
    end
+  
 end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
