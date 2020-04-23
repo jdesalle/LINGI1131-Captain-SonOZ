@@ -11,11 +11,6 @@ define
    CreatePortSubmarine
    CreateIds
    IdPlayersfun	   
-   AvailablePositions
-   Positions
-   AssignSpawn
-   PickRandom
-   Spawns
 %%%StateFunction
    StateList
    SetState%%%%to set the state
@@ -24,8 +19,8 @@ define
    Alive
    ProcessStream
    GetFinalState
-   
-   
+
+
    Broadcast
    BroadcastFire
    BroadcastMine
@@ -38,7 +33,7 @@ in
    fun{SetState ID Port Surface}
       state(id:ID port:Port surface:Surface)
    end
-   
+
    fun{UpdateSurf ID StateList}
       case StateList of nil then nil
       []H|T then
@@ -53,7 +48,7 @@ in
 	 end
       end
    end
- 
+
    fun{Alive StateList Deads}
       local
 	 fun{CheckDead ID Deads}
@@ -76,11 +71,11 @@ in
 	 end
       end
    end
-   
-   
-   
-   
-   %%create a list of state from the open ports %%%maybe have to modify this one for the ID? 
+
+
+
+
+   %%create a list of state from the open ports %%%maybe have to modify this one for the ID?
    fun{InitStateList PortList}
       local
 	 fun{InitStateList Acc PortList}
@@ -96,13 +91,13 @@ in
 	 end
       end
    end
-		      
-   
- 
-   
-   
+
+
+
+
+
 %---------------------Initialisation-----------
- 
+
    thread
       {System.show 'Main Thread Started'}
       WindowPort={GUI.portWindow}
@@ -115,8 +110,8 @@ in
       {Send PortsSubmarines.1 sayMove(1 'east')}
       {System.show 'Reached end of main thread sucessfully'}
    end
-   
-   
+
+
    %%------------Fonctions-initialisation-----
    %create port for every player (submarine)
    fun{CreatePortSubmarine}
@@ -129,63 +124,8 @@ in
    in
       {CreatePortSubmarineAAA Input.players Input.colors 1} %couille ici avec les couleurs et les id, c'est lee player generator qui les assigne donc a priori pas besoin d'eux ici?
    end
-   
 
-%Returns a list of positions pt(x:X y:Y) where there is no island
-   %Je suis pas sur que ce soit dans le main qu'il faille le mettre
-   fun{AvailablePositions}
-      fun{AvailablePositionsAAA Acc X Y Result} 
-	 case Acc of H|T then
-	    if X>=Input.nColumn then
-	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
-	       end
-	    else
-	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 X+1 Y Result}
-	       end
-	    end	        
-	 []nil then
-	    Result.2 %on est au bout, on skip le premier element qui est 000
-	 end
-      end	  
-   in     
-      local Res in
-	 Res={AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
-	 Res
-      end    
-   end
-   
-   
-   %Choisis des positions au hasard parmis la liste de positions sans iles
-   %Retourne une liste de la longueur du nombre de joueurs
-   %de nouveau je suis pas sur que ce soit dans le main qu'il faille le mettre
-   fun{AssignSpawn AvailablePositions}
-      fun{AssignSpawnAAA Len Liste}
-	 local Random Acc in
-	    Random={PickRandom AvailablePositions}
-	    Acc={List.append Liste Random|nil}
-	    if Len>0 then {AssignSpawnAAA Len-1 Acc}
-	    else
-	       Liste.2 %On skippe le 000
-	    end
-	 end	
-      end      
-   in
-      {AssignSpawnAAA Input.nbPlayer 000|nil}
-   end
-   
-   %prends un element au hasard dans une liste
-   fun{PickRandom Liste}
-      local Num Len in
-	 Len={List.length Liste}
-	 Num=({OS.rand} mod Len)+1
-	 {List.nth Liste Num}%Prends le Num element de la liste
-      end      
-   end
-   
+
    proc{Broadcast Message StateList}
       case StateList of nil then skip
       []H|T then
@@ -212,7 +152,7 @@ in
       []H|T then {GetFinalState T}
       end
    end
-   
+
    fun{Turn State StateList S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
 	 result(surface:true deads:nil)
@@ -227,11 +167,11 @@ in
 	    if Direction== surface then
 	       {Broadcast saySurface(State.id) StateList}
 	       result(surface:true deads:nil)
-	    else 
+	    else
 	       {Broadcast sayMove(State.id Direction) StateList}
 	       local
 		  KindItem StateItem
-	       in 
+	       in
 		  {Send State.port charge(State.id KindItem)}
 		  if KindItem \= null then
 		     {Broadcast sayCharge(State.id KindItem) StateList}
@@ -261,8 +201,8 @@ in
 	 end
       end
    end
-   
-   
+
+
    fun{PartieTT StateList}
       local
 	 fun {GetTurn Current StateList}
@@ -297,7 +237,7 @@ in
 	       case StateList of nil then nil
 	       []H|T then
 		  thread
-		     {Turn H StateList true}|{OpenThreads T StateList} 
+		     {Turn H StateList true}|{OpenThreads T StateList}
 		  end
 	       end
 	    end
@@ -312,29 +252,29 @@ in
 	       thread
 		  Final={GetFinalState Stream2}
 	       end
-	       
+
 	       {PartieSS Final}
 	    end
 	 end
       end
    end
-   
-   
-	 
+
+
+
 
 
 
 %---------------Jeu-------------
-   
-  % thread%J'ai rajoute un thread, pas sur qu'il faille je crois pas, a moins qu'a un moment on implémente la possibilité de jouer plusieur partie, et alors il serait avant
+
+  % thread%J'ai rajoute un thread, pas sur qu'il faille je crois pas, a moins qu'a un moment on implï¿½mente la possibilitï¿½ de jouer plusieur partie, et alors il serait avant
    local
       Winner
    in
       if(Input.isTurnByTurn) then
 	 Winner={PartieTT StateList}
-      else 
+      else
 	 Winner={PartieSS StateList}
       end
    end
-  
+
 end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
