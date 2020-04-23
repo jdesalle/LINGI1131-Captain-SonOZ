@@ -211,24 +211,35 @@ in
 		  {BroadcastFire ID KindFire T}
 	       end
 	    end
-	 []mine(Position) then
-	    {Broadcast sayMinePlaced(ID)}
-	    nil
-	 []drone
-	    local
-	       Answer
-	    in
-	       case StateList of nil then nil
-	       []H|T then
-		  {Send sayPassingDrone drone H.id Answer}
-		  {Send 
-		  end
-	       end
-	 []sonar
-	    nil
-	 else
-	    nil
 	 end
+      []mine(Position) then
+	 {Broadcast sayMinePlaced(ID)}
+	 nil
+      []drone
+	 local
+	    Answer
+	 in
+	    case StateList of nil then nil
+	    []H|T then
+	       {Send H.port sayPassingDrone(drone H.id Answer)}
+	       {Send ID sayAnswerDrone(drone H.id Answer)}
+		  {BroadcastFire ID KindFire T}
+	    end
+	 end
+      []sonar
+	 local
+	    Answer
+	 in
+	    case StateList of nil then nil
+	    []H|T then
+	       {Send H.port sayPassingSonar(sonar H.id Answer)}
+	       {Send ID sayAnswerSonar(sonar H.id Answer)}
+	       {BroadcastFire ID KindFire T}
+	    end
+	 end
+      else
+	 nil
+      end
    end
    fun{BroadcastMine Mine StateList}
       %%% TO DO
