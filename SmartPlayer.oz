@@ -316,8 +316,8 @@ in
 	    Position=pt(x:CurrentX+1 y:CurrentY)
 	    Direction='east'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	 elseif  {List.member pt(x:CurrentX y:CurrentY+1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY+1) State.pastPositions}==false then
-	    Position=pt(x:CurrentX y:CurrentY+1)
+	 elseif  {List.member pt(x:CurrentX y:CurrentY-1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY-1) State.pastPositions}==false then
+	    Position=pt(x:CurrentX y:CurrentY-1)
 	    Direction='north'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
 	 elseif
@@ -325,8 +325,8 @@ in
 	    Position=pt(x:CurrentX-1 y:CurrentY)
 	    Direction='west'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	 elseif  {List.member pt(x:CurrentX y:CurrentY-1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY-1) State.pastPositions}==false then
-	    Position=pt(x:CurrentX y:CurrentY-1)
+	 elseif  {List.member pt(x:CurrentX y:CurrentY+1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY+1) State.pastPositions}==false then
+	    Position=pt(x:CurrentX y:CurrentY+1)
 	    Direction='south'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
 	 else
