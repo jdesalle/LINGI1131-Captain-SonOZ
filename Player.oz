@@ -307,7 +307,7 @@ in
    %retourne le nouveau state
    fun{Move ?ID ?Position ?Direction State}
       ID=PlayerID
-      local CardDirections Choose IsX IsPossible in
+      local CardDirections Choose IsPossible in
 	 CardDirections= 'east'|'west'|'south'|'north'|nil
       %IN: east ou west ou north ou south
       %OUT: ans(bool:Bool position:Pos) Bool=true si on peu se deplacer dans cette direction, Pos vaut notre nouvelle position si on se deplace par la
@@ -352,11 +352,11 @@ in
       %OUT: State updated with the correct direction randomly chosen.
 	 fun{Choose List}
 	    if List==nil then
-	       Direction=Surface
+	       Direction='surface'
 	       Position=State.currentPosition
 	       {ModifState nil State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life}
 	    else
-	       local X  IsNotX in
+	       local X  IsNotX Possible in
 		  X={PickRandom List}
 		  fun{IsNotX Ele}
 		     if Ele==X then false
