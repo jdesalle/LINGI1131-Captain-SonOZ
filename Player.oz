@@ -58,38 +58,38 @@ in
 
 	 %----------------Actions--------
       []move(ID Position Direction)|T then
-	  if State.life=<0 then
+	 if State.life=<0 then
 	    ID=null
 	    {TreatStream T State}
 	 else
-	     {TreatStream T {Move ?ID ?Position ?Direction State}}
-	  end
+	    {TreatStream T {Move ?ID ?Position ?Direction State}}
+	 end
 	  
       []dive|T then
 	 {TreatStream T {Dive State}}
       []chargeItem(ID KindItem)|T then
-	  if State.life=<0 then
+	 if State.life=<0 then
 	    ID=null
 	    {TreatStream T State}
 	 else
-	     {TreatStream T {ChargeItem ?ID ?KindItem State}}
-	  end
+	    {TreatStream T {ChargeItem ?ID ?KindItem State}}
+	 end
 	  
       []fireItem(ID KindFire)|T then
-	  if State.life=<0 then
+	 if State.life=<0 then
 	    ID=null
 	    {TreatStream T State}
 	 else
-	     {TreatStream T {FireItem ?ID ?KindFire State}}
-	  end
+	    {TreatStream T {FireItem ?ID ?KindFire State}}
+	 end
 	  
       []fireMine(ID Mine)|T then
-	  if State.life=<0 then
+	 if State.life=<0 then
 	    ID=null
 	    {TreatStream T State}
 	 else
-	     {TreatStream T {FireMine ?ID ?Mine State}}
-	  end
+	    {TreatStream T {FireMine ?ID ?Mine State}}
+	 end
 	  
       []isDead(Answer)|T then
 	 {TreatStream T {IsDead ?Answer State}}
@@ -303,37 +303,83 @@ in
    %----------------------------------------------
    %-----Fonctions pour les actions:--------------
    %----------------------------------------------
-   %Si on peut aller a droite on y va, sinon on monte, sinon on va a gauche, sinon on descend, sinon on surface.
+   %On bouge randomly. Si on sait pas bouger on surface
    %retourne le nouveau state
    fun{Move ?ID ?Position ?Direction State}
       ID=PlayerID
-      local CurrentX CurrentY  in
-	 CurrentX=State.currentPosition.x
-	 CurrentY=State.currentPosition.y
-	 if {List.member pt(x:CurrentX+1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX+1 y:CurrentY) State.pastPositions}==false then
-	    Position=pt(x:CurrentX+1 y:CurrentY)
-	    Direction='east'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life}
-	 elseif  {List.member pt(x:CurrentX y:CurrentY-1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY-1) State.pastPositions}==false then
-	    Position=pt(x:CurrentX y:CurrentY-1)
-	    Direction='north'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life}
-	 elseif
-	    {List.member pt(x:CurrentX-1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX-1 y:CurrentY) State.pastPositions}==false then
-	    Position=pt(x:CurrentX-1 y:CurrentY)
-	    Direction='west'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life}
-	 elseif  {List.member pt(x:CurrentX y:CurrentY+1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY+1) State.pastPositions}==false then
-	    Position=pt(x:CurrentX y:CurrentY+1)
-	    Direction='south'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life}
-	 else
-	    Position=pt(x:CurrentX y:CurrentY)
-	    Direction='surface'
-	    {ModifState nil State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life}
+      local CardDirections Choose IsX IsPossible in
+	 CardDirections= 'east'|'west'|'south'|'north'|nil
+      %IN: east ou west ou north ou south
+      %OUT: ans(bool:Bool position:Pos) Bool=true si on peu se deplacer dans cette direction, Pos vaut notre nouvelle position si on se deplace par la
+	 fun{IsPossible Direction}
+	    local NewPos CurrentX CurrentY in
+	       CurrentX=State.currentPosition.x
+	       CurrentY=State.currentPosition.y
+	       case Direction of east then
+		  NewPos=pt(x:CurrentX+1 y:CurrentY)
+		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
+		     ans(bool:true position:NewPos)
+		  else
+		     ans(bool:false position:pt(x:1 y:1))
+		  end
+	       []west then
+		  NewPos=pt(x:CurrentX-1 y:CurrentY)
+		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
+		     ans(bool:true position:NewPos)
+		  else
+		     ans(bool:false position:pt(x:1 y:1))
+		  end
+	       []north then
+		  NewPos=pt(x:CurrentX y:CurrentY-1)
+		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
+		     ans(bool:true position:NewPos)
+		  else
+		     ans(bool:false position:pt(x:1 y:1))
+		  end
+	       []south then
+		  NewPos=pt(x:CurrentX y:CurrentY+1)
+		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
+		     ans(bool:true position:NewPos)
+		  else
+		     ans(bool:false position:pt(x:1 y:1))
+		  end
+	       end
+	    end
+	 end    
+      %will choose a random direction D in the list, if it is impossible for the player to move in direction D it will remove D from the list and retry.
+      %If there are no more directions in the list then we surface
+      %IN:List of <carddirections>
+      %OUT: State updated with the correct direction randomly chosen.
+	 fun{Choose List}
+	    if List==nil then
+	       Direction=Surface
+	       Position=State.currentPosition
+	       {ModifState nil State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life}
+	    else
+	       local X  IsNotX in
+		  X={PickRandom List}
+		  fun{IsNotX Ele}
+		     if Ele==X then false
+		     else
+			true
+		     end
+		  end   
+          %la fonction isPossible teste si on peut aller dans cette direction 	      
+		  Possible={IsPossible X}
+		  if Possible.bool then
+		     Direction=X
+		     Position=Possible.position
+		     {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life}
+		  else
+		     {Choose {List.filter List IsNotX}}
+		  end
+	       end
+	    end	 
 	 end
+	 {Choose CardDirections}
       end
    end
+
 
    %Si on peut charger on charge le missile en premier, sinon la mine, sinon le drone, sinon le sonar.
    fun{ChargeItem ?ID ?KindItem State}
