@@ -159,33 +159,6 @@ in
    end
    
    
-   %Choisis des positions au hasard parmis la liste de positions sans iles
-   %Retourne une liste de la longueur du nombre de joueurs
-   %de nouveau je suis pas sur que ce soit dans le main qu'il faille le mettre
-   fun{AssignSpawn AvailablePositions}
-      fun{AssignSpawnAAA Len Liste}
-	 local Random Acc in
-	    Random={PickRandom AvailablePositions}
-	    Acc={List.append Liste Random|nil}
-	    if Len>0 then {AssignSpawnAAA Len-1 Acc}
-	    else
-	       Liste.2 %On skippe le 000
-	    end
-	 end	
-      end      
-   in
-      {AssignSpawnAAA Input.nbPlayer 000|nil}
-   end
-   
-   %prends un element au hasard dans une liste
-   fun{PickRandom Liste}
-      local Num Len in
-	 Len={List.length Liste}
-	 Num=({OS.rand} mod Len)+1
-	 {List.nth Liste Num}%Prends le Num element de la liste
-      end      
-   end
-   
    proc{Broadcast Message StateList}
       case StateList of nil then skip
       []H|T then
@@ -261,8 +234,17 @@ in
       StateList
    end
    fun{ProcessStream Stream StateList}
-      Stream
-      %%TO DO
+      case Stream of nil then StateList
+      []H|T then
+	 local Surf
+	 in
+	    if H.surface==true then
+	       Surf= {UpdateSurf StateList}
+	    else
+	       Surf=StateList
+	    end
+	    {ProcessStream T {Alive StateList H.deads}
+	 end
    end
    fun{GetFinalState Stream}
       case Stream of nil then nil
