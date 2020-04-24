@@ -180,7 +180,7 @@ in
 		  {Broadcast Message StateList}
 		  Dead|{BroadcastFire ID KindFire T} 
 	       []sayDamageTaken(Infos) then
-		   {Broadcast Message StateList}
+		  {Broadcast Message StateList}
 		  {BroadcastFire ID KindFire T}
 	       end
 	    end
@@ -188,7 +188,7 @@ in
       []mine(Position) then
 	 {Broadcast sayMinePlaced(ID)}
 	 nil
-      []drone
+      []drone then
 	 local
 	    Answer
 	 in
@@ -196,10 +196,10 @@ in
 	    []H|T then
 	       {Send H.port sayPassingDrone(drone H.id Answer)}
 	       {Send ID sayAnswerDrone(drone H.id Answer)}
-		  {BroadcastFire ID KindFire T}
+	       {BroadcastFire ID KindFire T}
 	    end
 	 end
-      []sonar
+      []sonar then
 	 local
 	    Answer
 	 in
@@ -243,7 +243,7 @@ in
 	    else
 	       Surf=StateList
 	    end
-	    {ProcessStream T {Alive StateList H.deads}
+	    {ProcessStream T {Alive StateList H.deads}}
 	 end
    end
    fun{GetFinalState Stream}
@@ -361,9 +361,9 @@ in
    end
    
    
-	 
-
-
+   
+   
+   
 
 %---------------Jeu-------------
    
@@ -377,5 +377,5 @@ in
 	 Winner={PartieSS StateList}
       end
    end
-  
+   end
 end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
