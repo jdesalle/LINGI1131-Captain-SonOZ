@@ -216,22 +216,21 @@ in
    end
    fun{BroadcastMine ID  Mine StateList}
       case StateList of nil then nil
-	 []H|T then
-	    local
-	       Message
+      []H|T then
+	 local
+	    Message
 	    in
-	       {Send H.port sayMineExplode(ID Mine Message)}
-	       case Message of nil then {BroadcastMine ID Mine T}
-	       []sayDeath(Dead)then
-		  {Broadcast Message StateList}
-		  Dead|{BroadcastMine ID Mine T} 
+	    {Send H.port sayMineExplode(ID Mine Message)}
+	    case Message of nil then {BroadcastMine ID Mine T}
+	    []sayDeath(Dead)then
+	       {Broadcast Message StateList}
+	       Dead|{BroadcastMine ID Mine T} 
 	       []sayDamageTaken(Infos) then
-		  {Broadcast Message StateList}
-		  {BroadcastMine ID Mine T}
-	       end
+	       {Broadcast Message StateList}
+	       {BroadcastMine ID Mine T}
 	    end
-	 end%%% TO DO
-      StateList
+	 end
+      end
    end
    fun{ProcessStream Stream StateList}
       case Stream of nil then StateList
@@ -245,6 +244,7 @@ in
 	    end
 	    {ProcessStream T {Alive StateList H.deads}}
 	 end
+      end
    end
    fun{GetFinalState Stream}
       case Stream of nil then nil
@@ -377,5 +377,5 @@ in
 	 Winner={PartieSS StateList WindowPort}
       end
    end
-   end
+   
 end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
