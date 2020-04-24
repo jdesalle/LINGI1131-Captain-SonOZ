@@ -220,7 +220,7 @@ in
 	    local
 	       Message
 	    in
-	       {Send H.port sayMineExplode(ID Position Message)}
+	       {Send H.port sayMineExplode(ID Mine Message)}
 	       case Message of nil then {BroadcastMine ID Mine T}
 	       []sayDeath(Dead)then
 		  {Broadcast Message StateList}
@@ -253,7 +253,7 @@ in
       end
    end
    
-   fun{Turn State StateList S}%%%TODO add thinking if S is true
+   fun{Turn State StateList WindowsPort S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
 	 result(surface:true deads:nil)
       else
@@ -304,19 +304,19 @@ in
    end
    
    
-   fun{PartieTT StateList}
+   fun{PartieTT StateList WindowsPort}
       local
-	 fun {GetTurn Current StateList}
+	 fun {GetTurn Current StateList WindowPort}
 	    case StateList of nil then {PartieTT StateList}
 	    []H|T then
 	       local Result Surf in
-		  Result= {Turn H StateList false}
+		  Result= {Turn H StateList WindowPort false}
 		  if Result.surface==true then
 		     Surf={Alive {UpdateSurf H.id StateList} Result.deads}
 		  else
 		     Surf={Alive StateList Result.deads}
 		  end
-		  {GetTurn {Alive T Result.deads} Surf}
+		  {GetTurn {Alive T Result.deads} Surf WindowPort}
 	       end
 	    end
 	 end
@@ -324,21 +324,21 @@ in
 	 case StateList of nil then nil
 	 []H|nil then H
 	 []H|T then
-	    {GetTurn StateList StateList}
+	    {GetTurn StateList StateList WindowPort}
 	 end
       end
    end
-   fun{PartieSS StateList}
+   fun{PartieSS StateList WindowPort}
       local
 	 Stream Stream2
       in
 	 local
 	    Final
-	    fun{OpenThreads Current StateList}
+	    fun{OpenThreads Current StateList WindowPort}
 	       case StateList of nil then nil
 	       []H|T then
 		  thread
-		     {Turn H StateList true}|{OpenThreads T StateList} 
+		     {Turn H StateList WindowPort true}|{OpenThreads T StateList WindowPort} 
 		  end
 	       end
 	    end
@@ -346,7 +346,7 @@ in
 	    case StateList of nil then nil
 	    []H|nil then H
 	    []H|T then
-	       Stream={OpenThreads StateList StateList}
+	       Stream={OpenThreads StateList StateList WindowPort}
 	       thread
 		  Stream2={ProcessStream Stream StateList}
 	       end
@@ -354,7 +354,7 @@ in
 		  Final={GetFinalState Stream2}
 	       end
 	       
-	       {PartieSS Final}
+	       {PartieSS Final WindowPort}
 	    end
 	 end
       end
@@ -372,9 +372,9 @@ in
       Winner
    in
       if(Input.isTurnByTurn) then
-	 Winner={PartieTT StateList}
+	 Winner={PartieTT StateList WindowPort}
       else 
-	 Winner={PartieSS StateList}
+	 Winner={PartieSS StateList WindowPort}
       end
    end
    end
