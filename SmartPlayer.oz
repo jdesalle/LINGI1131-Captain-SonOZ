@@ -312,21 +312,21 @@ in
       local CurrentX CurrentY in
 	 CurrentX=State.currentPosition.x
 	 CurrentY=State.currentPosition.y
-	 if {List.member pt(x:CurrentX+1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX+1 y:CurrentY) State.pastPositions}==false then
-	    Position=pt(x:CurrentX+1 y:CurrentY)
+	 if {List.member pt(x:CurrentX y:CurrentY+1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY+1) State.pastPositions}==false then
+	    Position=pt(x:CurrentX y:CurrentY+1)
 	    Direction='east'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	 elseif  {List.member pt(x:CurrentX y:CurrentY-1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY-1) State.pastPositions}==false then
-	    Position=pt(x:CurrentX y:CurrentY-1)
+	 elseif  {List.member pt(x:CurrentX-1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX-1 y:CurrentY) State.pastPositions}==false then
+	    Position=pt(x:CurrentX-1 y:CurrentY)
 	    Direction='north'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
 	 elseif
-	    {List.member pt(x:CurrentX-1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX-1 y:CurrentY) State.pastPositions}==false then
-	    Position=pt(x:CurrentX-1 y:CurrentY)
+	    {List.member pt(x:CurrentX y:CurrentY-1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY-1) State.pastPositions}==false then
+	    Position=pt(x:CurrentX y:CurrentY-1)
 	    Direction='west'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	 elseif  {List.member pt(x:CurrentX y:CurrentY+1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY+1) State.pastPositions}==false then
-	    Position=pt(x:CurrentX y:CurrentY+1)
+	 elseif  {List.member pt(x:CurrentX+1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX+1 y:CurrentY) State.pastPositions}==false then
+	    Position=pt(x:CurrentX+1 y:CurrentY)
 	    Direction='south'
 	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
 	 else
@@ -538,26 +538,26 @@ in
 	       fun{NewPointAAA DirectionList Point}
 		  case{List.reverse DirectionList} of H|T then
 		     case H of west then
-			if {List.Member pt(x:Point.x+1 y:Point.y) PositionsAvailable} then
-			   {NewPointAAA T pt(x:Point.x+1 y:Point.y)}
+			if {List.Member pt(x:Point.x y:Point.y+1) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x y:Point.y+1)}
 			else
 			   false
 			end
 		     []east then
-			if {List.Member pt(x:Point.x-1 y:Point.y) PositionsAvailable} then
-			   {NewPointAAA T pt(x:Point.x-1 y:Point.y)}
+			if {List.Member pt(x:Point.x y:Point.y-1) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x y:Point.y-1)}
 			else
 			   false
 			end
 		     []south then
-			if {List.Member pt(x:Point.x y:Point.y-1) PositionsAvailable} then
-			   {NewPointAAA T pt(x:Point.x y:Point.y-1)}%quand le joueur descend il augmente son y de 1 donc on diminue le y de 1
+			if {List.Member pt(x:Point.x-1 y:Point.y) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x-1 y:Point.y)}%quand le joueur descend il augmente son y de 1 donc on diminue le y de 1
 			else
 			   false
 			end
 		     []north then
-			if {List.Member pt(x:Point.x y:Point.y+1) PositionsAvailable} then
-			   {NewPointAAA T pt(x:Point.x y:Point.y+1)}
+			if {List.Member pt(x:Point.x+1 y:Point.y) PositionsAvailable} then
+			   {NewPointAAA T pt(x:Point.x+1 y:Point.y)}
 			else
 			   false
 			end
