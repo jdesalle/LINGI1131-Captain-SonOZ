@@ -24,8 +24,7 @@ define
    Alive
    ProcessStream
    GetFinalState
-   
-   
+   %BroadCast's   
    Broadcast
    BroadcastFire
    BroadcastMine
@@ -76,9 +75,7 @@ in
 	 end
       end
    end
-   
-   
-   
+     
    
    %%create a list of state from the open ports %%%maybe have to modify this one for the ID? 
    fun{InitStateList PortList}
@@ -95,11 +92,7 @@ in
 	    {SetState 0 H surface(surface:true timeLeft:0)}|{InitStateList 1 T}
 	 end
       end
-   end
-		      
-   
- 
-   
+   end   
    
 %---------------------Initialisation-----------
  
@@ -115,21 +108,24 @@ in
       {Send PortsSubmarines.1 sayMove(1 'east')}
       {System.show 'Reached end of main thread sucessfully'}
    end
-   
-   
+      
    %%------------Fonctions-initialisation-----
    %create port for every player (submarine)
    fun{CreatePortSubmarine}
-      fun{CreatePortSubmarineAAA Subs Colors ID}
-	 case Subs of _|_ then
-	    {PlayerManager.playerGenerator Subs.1 Colors.1 ID}|{CreatePortSubmarineAAA Subs.2 Colors.2 ID+1}
-	 []nil then nil
-	 end
+      local
+	 fun{CreatePortSubmarineAAA Subs}
+	    case Subs of _|_ then
+	       local ID Color
+	       in
+		  {PlayerManager.playerGenerator Subs.1 Color ID}|{CreatePortSubmarineAAA Subs.2}
+	       end
+	    []nil then nil
+	    end
+	 end 
+      in
+	 {CreatePortSubmarineAAA Input.players}
       end
-   in
-      {CreatePortSubmarineAAA Input.players Input.colors 1} %couille ici avec les couleurs et les id, c'est lee player generator qui les assigne donc a priori pas besoin d'eux ici?
    end
-   
 
 %Returns a list of positions pt(x:X y:Y) where there is no island
    %Je suis pas sur que ce soit dans le main qu'il faille le mettre
@@ -166,7 +162,7 @@ in
 	 {Broadcast Message T}
       end
    end
-   fun{BroadcastFire ID KindFire StateList}
+   fun{BroadcastFire ID KindFire StateList WindowPort}
       case KindFire of nil then nil
       []missile(Position) then
 	 case StateList of nil then nil
@@ -175,18 +171,18 @@ in
 	       Message
 	    in
 	       {Send H.port sayMissileExplode(ID Position Message)}
-	       case Message of nil then {BroadcastFire ID KindFire T}
+	       case Message of nil then {BroadcastFire ID KindFire T WindowPort}
 	       []sayDeath(Dead)then
 		  {Broadcast Message StateList}
-		  Dead|{BroadcastFire ID KindFire T} 
+		  Dead|{BroadcastFire ID KindFire T WindowPort} 
 	       []sayDamageTaken(Infos) then
 		  {Broadcast Message StateList}
-		  {BroadcastFire ID KindFire T}
+		  {BroadcastFire ID KindFire T WindowPort}
 	       end
 	    end
 	 end
       []mine(Position) then
-	 {Broadcast sayMinePlaced(ID)}
+	 {Broadcast sayMinePlaced(ID)StateList}
 	 nil
       []drone then
 	 local
@@ -196,7 +192,7 @@ in
 	    []H|T then
 	       {Send H.port sayPassingDrone(drone H.id Answer)}
 	       {Send ID sayAnswerDrone(drone H.id Answer)}
-	       {BroadcastFire ID KindFire T}
+	       {BroadcastFire ID KindFire T WindowPort}
 	    end
 	 end
       []sonar then
@@ -207,27 +203,27 @@ in
 	    []H|T then
 	       {Send H.port sayPassingSonar(sonar H.id Answer)}
 	       {Send ID sayAnswerSonar(sonar H.id Answer)}
-	       {BroadcastFire ID KindFire T}
+	       {BroadcastFire ID KindFire T WindowPort}
 	    end
 	 end
       else
 	 nil
       end
    end
-   fun{BroadcastMine ID  Mine StateList}
+   fun{BroadcastMine ID  Mine StateList WindowPort}
       case StateList of nil then nil
       []H|T then
 	 local
 	    Message
 	    in
 	    {Send H.port sayMineExplode(ID Mine Message)}
-	    case Message of nil then {BroadcastMine ID Mine T}
+	    case Message of nil then {BroadcastMine ID Mine T WindowPort}
 	    []sayDeath(Dead)then
 	       {Broadcast Message StateList}
-	       Dead|{BroadcastMine ID Mine T} 
+	       Dead|{BroadcastMine ID Mine T WindowPort} 
 	       []sayDamageTaken(Infos) then
 	       {Broadcast Message StateList}
-	       {BroadcastMine ID Mine T}
+	       {BroadcastMine ID Mine T WindowPort}
 	    end
 	 end
       end
@@ -238,7 +234,7 @@ in
 	 local Surf
 	 in
 	    if H.surface==true then
-	       Surf= {UpdateSurf StateList}
+	       Surf= {UpdateSurf H.id StateList}
 	    else
 	       Surf=StateList
 	    end
@@ -282,7 +278,7 @@ in
 		  in
 		     {Send State.port fireItem(State.id KindFire)}
 		     if KindFire \= null then
-			Dead1={BroadcastFire State.id KindFire StateList}
+			Dead1={BroadcastFire State.id KindFire StateList WindowPort}
 		     else
 			Dead1=nil
 		     end
@@ -290,11 +286,11 @@ in
 			Mine Message Dead
 		     in
 			if Mine \=null then
-			   Dead={BroadcastMine Mine {Alive StateList Dead1}}
+			   Dead={BroadcastMine State.id Mine {Alive StateList Dead1} WindowPort}
 			else
 			   Dead=Dead1
 			end
-			   result(surface:false deads:Dead)
+			   result(surface:false deads:Dead id:State.id)
 		     end
 		  end
 	       end
@@ -303,11 +299,10 @@ in
       end
    end
    
-   
    fun{PartieTT StateList WindowsPort}
       local
 	 fun {GetTurn Current StateList WindowPort}
-	    case StateList of nil then {PartieTT StateList}
+	    case StateList of nil then {PartieTT StateList WindowPort}
 	    []H|T then
 	       local Result Surf in
 		  Result= {Turn H StateList WindowPort false}
@@ -360,14 +355,8 @@ in
       end
    end
    
-   
-   
-   
-   
-
 %---------------Jeu-------------
    
-  % thread%J'ai rajoute un thread, pas sur qu'il faille je crois pas, a moins qu'a un moment on implémente la possibilité de jouer plusieur partie, et alors il serait avant
    local
       Winner
    in
@@ -379,3 +368,5 @@ in
    end
    
 end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
+
+     
