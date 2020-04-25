@@ -3,19 +3,11 @@ import
    GUI
    Input
    PlayerManager
-   OS
    System
 define
    WindowPort
    PortsSubmarines
    CreatePortSubmarine
-   CreateIds
-   IdPlayersfun	   
-   AvailablePositions
-   Positions
-   AssignSpawn
-   PickRandom
-   Spawns
 %%%StateFunction
    StateList
    SetState%%%%to set the state
@@ -24,7 +16,7 @@ define
    Alive
    ProcessStream
    GetFinalState
-   %BroadCast's   
+   %BroadCast's
    Broadcast
    BroadcastFire
    BroadcastMine
@@ -37,7 +29,7 @@ in
    fun{SetState ID Port Surface}
       state(id:ID port:Port surface:Surface)
    end
-   
+
    fun{UpdateSurf ID StateList}
       case StateList of nil then nil
       []H|T then
@@ -52,12 +44,12 @@ in
 	 end
       end
    end
- 
+
    fun{Alive StateList Deads}
       local
 	 fun{CheckDead ID Deads}
 	    case Deads of nil then false
-	    []H|T then
+	    []H|_ then
 	       if ID==H.id then true
 	       else
 		  false
@@ -75,13 +67,13 @@ in
 	 end
       end
    end
-     
-   
-   %%create a list of state from the open ports %%%maybe have to modify this one for the ID? 
+
+
+   %%create a list of state from the open ports %%%maybe have to modify this one for the ID?
    fun{InitStateList PortList}
       local
 	 fun{InitStateList Acc PortList}
-	    case portList of nil then nil
+	    case PortList of nil then nil
 	    []H|T then
 	       {SetState Acc H surface(surface:true timeLeft:0)}|{InitStateList Acc+1 T}
 	    end
@@ -92,10 +84,10 @@ in
 	    {SetState 0 H surface(surface:true timeLeft:0)}|{InitStateList 1 T}
 	 end
       end
-   end   
-   
+   end
+
 %---------------------Initialisation-----------
- 
+
    thread
       {System.show 'Main Thread Started'}
       WindowPort={GUI.portWindow}
@@ -108,7 +100,7 @@ in
       {Send PortsSubmarines.1 sayMove(1 'east')}
       {System.show 'Reached end of main thread sucessfully'}
    end
-      
+
    %%------------Fonctions-initialisation-----
    %create port for every player (submarine)
    fun{CreatePortSubmarine}
@@ -121,40 +113,12 @@ in
 	       end
 	    []nil then nil
 	    end
-	 end 
+	 end
       in
 	 {CreatePortSubmarineAAA Input.players}
       end
    end
 
-%Returns a list of positions pt(x:X y:Y) where there is no island
-   %Je suis pas sur que ce soit dans le main qu'il faille le mettre
-   fun{AvailablePositions}
-      fun{AvailablePositionsAAA Acc X Y Result} 
-	 case Acc of H|T then
-	    if X>=Input.nColumn then
-	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
-	       end
-	    else
-	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 X+1 Y Result}
-	       end
-	    end	        
-	 []nil then
-	    Result.2 %on est au bout, on skip le premier element qui est 000
-	 end
-      end	  
-   in     
-      local Res in
-	 Res={AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
-	 Res
-      end    
-   end
-   
-   
    proc{Broadcast Message StateList}
       case StateList of nil then skip
       []H|T then
@@ -174,7 +138,7 @@ in
 	       case Message of nil then {BroadcastFire ID KindFire T WindowPort}
 	       []sayDeath(Dead)then
 		  {Broadcast Message StateList}
-		  Dead|{BroadcastFire ID KindFire T WindowPort} 
+		  Dead|{BroadcastFire ID KindFire T WindowPort}
 	       []sayDamageTaken(Infos) then
 		  {Broadcast Message StateList}
 		  {BroadcastFire ID KindFire T WindowPort}
@@ -220,7 +184,7 @@ in
 	    case Message of nil then {BroadcastMine ID Mine T WindowPort}
 	    []sayDeath(Dead)then
 	       {Broadcast Message StateList}
-	       Dead|{BroadcastMine ID Mine T WindowPort} 
+	       Dead|{BroadcastMine ID Mine T WindowPort}
 	       []sayDamageTaken(Infos) then
 	       {Broadcast Message StateList}
 	       {BroadcastMine ID Mine T WindowPort}
@@ -245,10 +209,10 @@ in
    fun{GetFinalState Stream}
       case Stream of nil then nil
       []H|nil then H
-      []H|T then {GetFinalState T}
+      []_|T then {GetFinalState T}
       end
    end
-   
+
    fun{Turn State StateList WindowsPort S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
 	 result(surface:true deads:nil)
@@ -263,12 +227,12 @@ in
 	    if Direction== surface then
 	       {Broadcast saySurface(State.id) StateList}
 	       result(surface:true deads:nil)
-	    else 
+	    else
 	       {Broadcast sayMove(State.id Direction) StateList}
 	       {Send WindowsPort movePlayer(State.id Direction)}
 	       local
-		  KindItem StateItem
-	       in 
+		  KindItem
+	       in
 		  {Send State.port charge(State.id KindItem)}
 		  if KindItem \= null then
 		     {Broadcast sayCharge(State.id KindItem) StateList}
@@ -283,7 +247,7 @@ in
 			Dead1=nil
 		     end
 		     local
-			Mine Message Dead
+			Mine Dead
 		     in
 			if Mine \=null then
 			   Dead={BroadcastMine State.id Mine {Alive StateList Dead1} WindowPort}
@@ -298,7 +262,7 @@ in
 	 end
       end
    end
-   
+
    fun{PartieTT StateList WindowsPort}
       local
 	 fun {GetTurn Current StateList WindowPort}
@@ -318,7 +282,7 @@ in
       in
 	 case StateList of nil then nil
 	 []H|nil then H
-	 []H|T then
+	 []_|_ then
 	    {GetTurn StateList StateList WindowPort}
 	 end
       end
@@ -333,14 +297,14 @@ in
 	       case StateList of nil then nil
 	       []H|T then
 		  thread
-		     {Turn H StateList WindowPort true}|{OpenThreads T StateList WindowPort} 
+		     {Turn H StateList WindowPort true}|{OpenThreads T StateList WindowPort}
 		  end
 	       end
 	    end
 	 in
 	    case StateList of nil then nil
 	    []H|nil then H
-	    []H|T then
+	    []_|_ then
 	       Stream={OpenThreads StateList StateList WindowPort}
 	       thread
 		  Stream2={ProcessStream Stream StateList}
@@ -348,25 +312,23 @@ in
 	       thread
 		  Final={GetFinalState Stream2}
 	       end
-	       
+
 	       {PartieSS Final WindowPort}
 	    end
 	 end
       end
    end
-   
+
 %---------------Jeu-------------
-   
+
    local
       Winner
    in
       if(Input.isTurnByTurn) then
 	 Winner={PartieTT StateList WindowPort}
-      else 
+      else
 	 Winner={PartieSS StateList WindowPort}
       end
    end
-   
-end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
 
-     
+end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
