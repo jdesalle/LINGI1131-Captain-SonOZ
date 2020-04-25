@@ -25,6 +25,7 @@ define
    PartieSS
    Turn
 in
+%-----------------States Functions----------------
 %%%%%create a state from the differents agruments
    fun{SetState ID Port Surface}
       state(id:ID port:Port surface:Surface)
@@ -67,8 +68,6 @@ in
 	 end
       end
    end
-
-
    %%create a list of state from the open ports %%%maybe have to modify this one for the ID?
    fun{InitStateList PortList}
       local
@@ -85,23 +84,7 @@ in
 	 end
       end
    end
-
-%---------------------Initialisation-----------
-
-   thread
-      {System.show 'Main Thread Started'}
-      WindowPort={GUI.portWindow}
-      {Send WindowPort buildWindow}
-      PortsSubmarines={CreatePortSubmarine}
-      StateList={InitStateList PortsSubmarines}
-      {System.show 'StateList and above Initialized'}
-     % {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn. FAILS because IdPlayer not defin
-      {Send WindowPort putMine(1 pt(x:1 y:1))}%does nothing idk why
-      {Send PortsSubmarines.1 sayMove(1 'east')}
-      {System.show 'Reached end of main thread sucessfully'}
-   end
-
-   %%------------Fonctions-initialisation-----
+ %%------------Fonctions-initialisation-----
    %create port for every player (submarine)
    fun{CreatePortSubmarine}
       local
@@ -118,7 +101,7 @@ in
 	 {CreatePortSubmarineAAA Input.players}
       end
    end
-
+%------------Broadcats fucntions-----------------
    proc{Broadcast Message StateList}
       case StateList of nil then skip
       []H|T then
@@ -192,6 +175,8 @@ in
 	 end
       end
    end
+
+   %------------Stream Process Functions-----------------
    fun{ProcessStream Stream StateList}
       case Stream of nil then StateList
       []H|T then
@@ -212,7 +197,7 @@ in
       []_|T then {GetFinalState T}
       end
    end
-
+%---------------Turn and games Function---------------
    fun{Turn State StateList WindowPort S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
 	 result(surface:true deads:nil)
@@ -262,7 +247,6 @@ in
 	 end
       end
    end
-
    fun{PartieTT StateList WindowPort}
       local
 	 fun {GetTurn Current StateList WindowPort}
@@ -318,9 +302,20 @@ in
 	 end
       end
    end
-
+%---------------------Initialisation-----------
+   thread
+      {System.show 'Main Thread Started'}
+      WindowPort={GUI.portWindow}
+      {Send WindowPort buildWindow}
+      PortsSubmarines={CreatePortSubmarine}
+      StateList={InitStateList PortsSubmarines}
+      {System.show 'StateList and above Initialized'}
+     % {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn. FAILS because IdPlayer not defin
+      {Send WindowPort putMine(1 pt(x:1 y:1))}%does nothing idk why
+      {Send PortsSubmarines.1 sayMove(1 'east')}
+      {System.show 'Reached end of main thread sucessfully'}
+   end
 %---------------Jeu-------------
-
    local
       Winner
    in
@@ -330,5 +325,4 @@ in
 	 Winner={PartieSS StateList WindowPort}
       end
    end
-
-end%En du define tout ce qui est au dessus doit etre indente une fois!!!!
+end
