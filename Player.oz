@@ -31,7 +31,7 @@ define
    %Added By me
    PlayerID %assignes par la fonction startplayer qui est appellee par le playerGenerator qui est lui meme appelle quand on cree les ports dans le main
    %L'ID est assigne par la fonction StartPlayer qui est apellee avec les bons arguments dans le player generator.
-   %Le playerGenerator est appellé quand on cree les ports dans le main
+   %Le playerGenerator est appellï¿½ quand on cree les ports dans le main
    PlayerColor
    ModifState
    AvailablePositions
@@ -64,7 +64,7 @@ in
 	 else
 	    {TreatStream T {Move ?ID ?Position ?Direction State}}
 	 end
-	  
+
       []dive|T then
 	 {TreatStream T {Dive State}}
       []chargeItem(ID KindItem)|T then
@@ -74,7 +74,7 @@ in
 	 else
 	    {TreatStream T {ChargeItem ?ID ?KindItem State}}
 	 end
-	  
+
       []fireItem(ID KindFire)|T then
 	 if State.life=<0 then
 	    ID=null
@@ -82,7 +82,7 @@ in
 	 else
 	    {TreatStream T {FireItem ?ID ?KindFire State}}
 	 end
-	  
+
       []fireMine(ID Mine)|T then
 	 if State.life=<0 then
 	    ID=null
@@ -90,7 +90,7 @@ in
 	 else
 	    {TreatStream T {FireMine ?ID ?Mine State}}
 	 end
-	  
+
       []isDead(Answer)|T then
 	 {TreatStream T {IsDead ?Answer State}}
       %--------------Messages-
@@ -203,9 +203,9 @@ in
       else
 	 Answer=false
 	 State
-      end     
+      end
    end
-   
+
    fun{SayMove ID Direction State}
       {System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
       State
@@ -257,7 +257,7 @@ in
       case Drone of drone(row x) then %Je suis pas sur que le case of drone(row x) soit syntaxiquement correct. A tester.
 	 if Drone.row==State.currentPosition.x then Answer=true
 	 else Answer=false
-	 end	 
+	 end
       []drone(column y) then
 	 if Drone.column==State.currentPosition.y then Answer=true
 	 else Answer=false
@@ -270,13 +270,13 @@ in
       {System.show 'Drone has been sent at '#Drone#' and the answer is '#Answer#' Player identified is '#ID}
       State
    end
-   
+
    fun{SayDeath ID State}
       {System.show 'Player of ID '#ID#' died. May he rest in peace'}
       State
    end
 
-   
+
    fun{SayDamageTaken ID Damage LifeLeft State}
       {System.show 'Player of ID ' #ID# ' has taken '#Damage# 'damage. He still has ' #LifeLeft# ' lives' }
       State
@@ -297,9 +297,9 @@ in
       {System.show 'Player of ID' #ID# ' has been identified by a sonar at position ' #Answer}
       State
    end
-   
 
-   
+
+
    %----------------------------------------------
    %-----Fonctions pour les actions:--------------
    %----------------------------------------------
@@ -316,28 +316,28 @@ in
 	       CurrentX=State.currentPosition.x
 	       CurrentY=State.currentPosition.y
 	       case Direction of east then
-		  NewPos=pt(x:CurrentX+1 y:CurrentY)
+		  NewPos=pt(x:CurrentX y:CurrentY+1)
 		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
 		     ans(bool:true position:NewPos)
 		  else
 		     ans(bool:false position:pt(x:1 y:1))
 		  end
 	       []west then
-		  NewPos=pt(x:CurrentX-1 y:CurrentY)
-		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
-		     ans(bool:true position:NewPos)
-		  else
-		     ans(bool:false position:pt(x:1 y:1))
-		  end
-	       []north then
 		  NewPos=pt(x:CurrentX y:CurrentY-1)
 		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
 		     ans(bool:true position:NewPos)
 		  else
 		     ans(bool:false position:pt(x:1 y:1))
 		  end
+	       []north then
+		  NewPos=pt(x:CurrentX-1 y:CurrentY)
+		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
+		     ans(bool:true position:NewPos)
+		  else
+		     ans(bool:false position:pt(x:1 y:1))
+		  end
 	       []south then
-		  NewPos=pt(x:CurrentX y:CurrentY+1)
+		  NewPos=pt(x:CurrentX+1 y:CurrentY)
 		  if {List.member NewPos PositionsAva}==true andthen {List.member NewPos State.pastPositions}==false then
 		     ans(bool:true position:NewPos)
 		  else
@@ -345,7 +345,7 @@ in
 		  end
 	       end
 	    end
-	 end    
+	 end
       %will choose a random direction D in the list, if it is impossible for the player to move in direction D it will remove D from the list and retry.
       %If there are no more directions in the list then we surface
       %IN:List of <carddirections>
@@ -363,8 +363,8 @@ in
 		     else
 			true
 		     end
-		  end   
-          %la fonction isPossible teste si on peut aller dans cette direction 	      
+		  end
+          %la fonction isPossible teste si on peut aller dans cette direction
 		  Possible={IsPossible X}
 		  if Possible.bool then
 		     Direction=X
@@ -374,7 +374,7 @@ in
 		     {Choose {List.filter List IsNotX}}
 		  end
 	       end
-	    end	 
+	    end
 	 end
 	 {Choose CardDirections}
       end
@@ -419,7 +419,7 @@ in
 	    State.items.Item >0
 	 end
 	 if {CanFire 'missile' State} then
-	    KindFire=missile({PickRandom {PositionsInRange missile PositionsAva State}})%ducoup on peut se tirer sur soi meme  
+	    KindFire=missile({PickRandom {PositionsInRange missile PositionsAva State}})%ducoup on peut se tirer sur soi meme
 	    {ModifState State.pastPositions items(missile:State.items.missile-1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 elseif {CanFire 'mine' State} then
 	    local MinePosition in
@@ -444,7 +444,7 @@ in
    %Si on a une ou plusieur mines on en fait exploser une au hasard.
    fun{FireMine ?ID ?Mine State}
       ID=PlayerID
-      case State.placedMines of _|_ then 
+      case State.placedMines of _|_ then
 	 Mine={PickRandom State.placedMines}
 	 {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life}
       []nil then
@@ -496,7 +496,7 @@ in
       fun{AvailablePositionsAAA Acc X Y Result}
 	 case Acc of _|_ then
 	    if X>=Input.nColumn then
-	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
+	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 X Y+1 {List.append Result pt(x:X y:Y)|nil}}
 	       else
 		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
 	       end
@@ -538,7 +538,7 @@ in
 	       if Dist>=Input.minDistanceMine andthen Dist =<Input.maxDistanceMine then true
 	       else
 		  false
-	       end    
+	       end
 	    end
 	 end
 
@@ -547,10 +547,10 @@ in
 	       if Dist>=Input.minDistanceMissile andthen Dist =<Input.maxDistanceMissile then true
 	       else
 		  false
-	       end    
+	       end
 	    end
 	 end
-	 
+
 	 case KindItem of mine then
 	    {List.filter PositionsAva MineBool} %retourne la liste des elements qui satisfont la fonction {MineBool Element} parmis les positions sans iles.
 	 []missile then
