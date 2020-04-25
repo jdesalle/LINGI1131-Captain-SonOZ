@@ -213,7 +213,7 @@ in
       end
    end
 
-   fun{Turn State StateList WindowsPort S}%%%TODO add thinking if S is true
+   fun{Turn State StateList WindowPort S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
 	 result(surface:true deads:nil)
       else
@@ -229,7 +229,7 @@ in
 	       result(surface:true deads:nil)
 	    else
 	       {Broadcast sayMove(State.id Direction) StateList}
-	       {Send WindowsPort movePlayer(State.id Direction)}
+	       {Send WindowPort movePlayer(State.id Direction)}
 	       local
 		  KindItem
 	       in
@@ -263,7 +263,7 @@ in
       end
    end
 
-   fun{PartieTT StateList WindowsPort}
+   fun{PartieTT StateList WindowPort}
       local
 	 fun {GetTurn Current StateList WindowPort}
 	    case StateList of nil then {PartieTT StateList WindowPort}
