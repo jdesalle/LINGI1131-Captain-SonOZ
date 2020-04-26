@@ -286,9 +286,9 @@ in
    fun{SayPassingSonar ?ID ?Answer State}
       ID=PlayerID
       if ({OS.rand}mod 2)+1 == 1 then
-	 Answer=pt(x:State.currentPosition.x y:({OS.rand} mod Input.nRow)+1)
+	 Answer=pt(x:State.currentPosition.x y:({OS.rand} mod Input.nColumn)+1)
       else
-	 Answer=pt(x:({OS.rand} mod Input.nColumn)+1 y:State.currentPosition.y)
+	 Answer=pt(x:({OS.rand} mod Input.nRow)+1 y:State.currentPosition.y)
       end
       State
    end
