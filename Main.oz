@@ -29,9 +29,25 @@ in
    %create port for every player (submarine)
    fun{CreatePortSubmarine}
       local
-	 {PlayerManager.playerGenerator Subs.1 Color ID}|{CreatePortSubmarineAAA Subs.2}
-   end%%%Return list of States-> state(id:EBNFID port:PLAYERPORT surface:SURFACEITEM)  Surface -> surface(surface: BOOL turnLeft:INT)
-
+	 fun{CreatPortSubmarine Acc}
+	    local
+	       Color Name Port
+	    in
+	       if Acc<Input.nbPlayer then
+		  Name={List.nth Input.players Acc+1}
+		  Color={List.nth Input.colors Acc+1}
+		  Port={PlayerManager.playerGenerator Name Color Acc}
+		  surface(id:Acc port:Port surface:surface(surface:true timeLeft:0))|{CreatPortSubmarine Acc+1}
+	       else
+		  nil
+	       end
+	    end
+	 end
+      in
+	 {CreatPortSubmarine 0}
+      end
+   end%%%Return list of States-> state(id:EBNFID port:PLAYERPORT surface:SURFACEITEM)  Surface -> surface(surface: BOOL timeLeft:INT)
+   
 %-----------------States Functions----------------
 %%%%%create a state from the differents agruments
    fun{SetState ID Port Surface}
@@ -284,7 +300,7 @@ in
       {System.show 'Main Thread Started'}
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
-      Statelist={CreatePortSubmarine}
+      StateList={CreatePortSubmarine}
       {System.show 'StateList and above Initialized'}
       {System.show 'Reached end of main thread sucessfully'}
    end
