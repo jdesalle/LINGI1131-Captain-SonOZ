@@ -32,7 +32,6 @@ define
    PlayerID %assignes par la fonction startplayer qui est appellee par le playerGenerator qui est lui meme appelle quand on cree les ports dans le main
    %L'ID est assigne par la fonction StartPlayer qui est apellee avec les bons arguments dans le player generator.
    %Le playerGenerator est appell� quand on cree les ports dans le main
-   PlayerColor
    ModifState
    AvailablePositions
    PickRandom
@@ -179,8 +178,7 @@ in
    in
       {NewPort Stream Port}
       thread
-	 PlayerColor=Color
-	 PlayerID=ID
+	 PlayerID=id(id:ID color:Color name:'smartPlayer')
 	 {TreatStream Stream nil}
       end
       Port
@@ -230,7 +228,8 @@ in
    fun{SayMissileExplode ID Position ?Message State}
       local Dis in
 	 Dis={ManhattanDistance State Position}
-	 if State.life - Dis =<0 then
+   if Dis==null then Message=sayDamageTaken(ID 0 State.life)
+	 elseif State.life - Dis =<0 then
 	    Message=sayDeath(ID)
 	 else
 	    Message=sayDamageTaken(ID Dis State.life-Dis)
@@ -243,7 +242,8 @@ in
    fun{SayMineExplode ID Position ?Message State} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
       local Dis in
 	 Dis={ManhattanDistance State Position}
-	 if State.life-Dis=<0 then
+   if Dis==null then Message=sayDamageTaken(ID 0 State.life)
+	 elseif State.life-Dis=<0 then
 	    Message=sayDeath(ID)
 	 else Message=sayDamageTaken(ID Dis State.life-Dis)
 	 end
@@ -310,23 +310,23 @@ in
       local CurrentX CurrentY in
 	 CurrentX=State.currentPosition.x
 	 CurrentY=State.currentPosition.y
-	 if {List.member pt(x:CurrentX y:CurrentY+1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY+1) State.pastPositions}==false then
+	 if {List.member pt(x:CurrentX y:CurrentY+1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY+1) State.pastPosition}==false then
 	    Position=pt(x:CurrentX y:CurrentY+1)
 	    Direction='east'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	 elseif  {List.member pt(x:CurrentX-1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX-1 y:CurrentY) State.pastPositions}==false then
+	    {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
+	 elseif  {List.member pt(x:CurrentX-1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX-1 y:CurrentY) State.pastPosition}==false then
 	    Position=pt(x:CurrentX-1 y:CurrentY)
 	    Direction='north'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
+	    {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
 	 elseif
-	    {List.member pt(x:CurrentX y:CurrentY-1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY-1) State.pastPositions}==false then
+	    {List.member pt(x:CurrentX y:CurrentY-1) PositionsAva}==true andthen {List.member pt(x:CurrentX y:CurrentY-1) State.pastPosition}==false then
 	    Position=pt(x:CurrentX y:CurrentY-1)
 	    Direction='west'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	 elseif  {List.member pt(x:CurrentX+1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX+1 y:CurrentY) State.pastPositions}==false then
+	    {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
+	 elseif  {List.member pt(x:CurrentX+1 y:CurrentY) PositionsAva}==true andthen {List.member pt(x:CurrentX+1 y:CurrentY) State.pastPosition}==false then
 	    Position=pt(x:CurrentX+1 y:CurrentY)
 	    Direction='south'
-	    {ModifState {List.append State.pastPositions Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
+	    {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
 	 else
 	    Position=pt(x:CurrentX y:CurrentY)
 	    Direction='surface'
@@ -340,28 +340,28 @@ in
       ID=PlayerID
       if State.charges.missile+1<Input.missile then
 	 KindItem=missile
-	 {ModifState State.pastPositions State.items charges(missile:State.charges.missile+1 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile+1 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       elseif State.charges.missile+1==Input.missile then
 	 KindItem=missile
-	 {ModifState State.pastPositions items(missile:State.items.missile+1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) charges(missile:0 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition items(missile:State.items.missile+1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) charges(missile:0 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       elseif State.charges.mine+1 < Input.mine then
 	 KindItem=mine
-	 {ModifState State.pastPositions State.items charges(missile:State.charges.missile mine:State.charges.mines+1 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mines+1 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       elseif State.charges.mine+1 == Input.mine then
 	 KindItem=mine
-	 {ModifState State.pastPositions items(missile:State.items.missile mine:State.items.mine+1 sonar:State.items.sonar drone:State.items.drone) charges(missile:State.charges.missile mine:0 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine+1 sonar:State.items.sonar drone:State.items.drone) charges(missile:State.charges.missile mine:0 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       elseif State.charges.drone+1 <Input.drone then
 	 KindItem=drone
-	 {ModifState State.pastPositions State.items charges(missile:State.charges.missile mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone+1) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone+1) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       elseif State.charges.drone+1 == Input.drone then
 	 KindItem=drone
-	 {ModifState State.pastPositions items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone+1) charges(missile:State.charges.missile mine:State.charges.mines sonar:State.charges.sonar drone:0) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone+1) charges(missile:State.charges.missile mine:State.charges.mines sonar:State.charges.sonar drone:0) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       elseif State.charges.sonar+1 < Input.sonar then
 	 KindItem=sonar
-	 {ModifState State.pastPositions State.items charges(missile:State.charges.missile mine:State.charges.mines sonar:State.charges.sonar+1 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mines sonar:State.charges.sonar+1 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       else
 	 KindItem=sonar
-	 {ModifState State.pastPositions items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar+1 drone:State.items.drone) charges(missile:State.charges.missile mine:State.charges.mine sonar:0 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	 {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar+1 drone:State.items.drone) charges(missile:State.charges.missile mine:State.charges.mine sonar:0 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
       end
    end
 
@@ -378,7 +378,7 @@ in
 	    FirePosition={FindMissileFirePosition PositionsToChooseFrom PositionInRange State true 1}%On s'autorise a prendre 1 degat quand on tire
 	    if FirePosition.fire==true then
 	       KindFire=missile(FirePosition.where)
-	       {ModifState State.pastPositions items(missile:State.items.missile-1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	       {ModifState State.pastPosition items(missile:State.items.missile-1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
 	    else
 	       KindFire=null
 	       State
@@ -388,14 +388,14 @@ in
 	    local MinePosition in
 	       MinePosition={PickRandom {PositionsInRange mine PositionsAva State}}
 	       KindFire=mine(MinePosition)
-	       {ModifState State.pastPositions items(missile:State.items.missile mine:State.items.mine-1 sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface {List.append State.placedMines MinePosition|nil} State.life State.ennemyStateList}
+	       {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine-1 sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface {List.append State.placedMines MinePosition|nil} State.life State.ennemyStateList}
 	    end
 	 elseif {CanFire 'drone' State} then %si on a pas de mine ni de missile on tente de tirer un drone quelque part
 	    KindFire=drone(row {PickRandom PositionsAva}.y)% On tire un drone sur une ligne au hasard, jamais une colonne
-	    {ModifState State.pastPositions items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone-1) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone-1) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
 	 elseif {CanFire 'sonar' State} then %si on a pas de mine ni de missile ni de drone on tente de tirer un sonar
 	    KindFire=sonar
-	    {ModifState State.pastPositions items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar-1 drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
+	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar-1 drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
 	 else
 	    KindFire=null
 	    State
@@ -411,7 +411,7 @@ in
 	 local PositionsToChooseFrom in
 	    PositionsToChooseFrom={FindPlayerPosition PositionsAva {PickRandom State.ennemyStateList}.direction} %on choisi un joueur a tuer au hasard parmis ceux qu'on a enregistre
 	    Mine={FindMineToDetonate State PositionsToChooseFrom false 1} %on dit qu'on ne veut pas se tirer sur nous meme
-	    {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life State.ennemyStateList}
+	    {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life State.ennemyStateList}
 	 end
       []nil then
 	 Mine=null
@@ -488,7 +488,7 @@ in
    fun{PositionsInRange KindItem PositionsAva State}
       local Distance MineBool MissBool in
 	 fun{Distance Position}% donne la manhattan distance entre la position actuelle et Position
-	    Distance={Number.abs State.currentPosition.x-Position.x}+{Number.abs State.currentPosition.y-Position.y}
+	    {Number.abs State.currentPosition.x-Position.x}+{Number.abs State.currentPosition.y-Position.y}
 	 end
 
 	 fun{MineBool Pos}%retoune true si la mine peut etre placee a la position pos
@@ -666,10 +666,10 @@ in
 	    Temporary={List.filter State.ennemyStateList IsNotId}
 	    NewEnnemyState=ennemyState(id:Temp.id direction:{List.append Temp.direction Direction|nil})
 	    NewEnnemyStateList={List.append Temporary NewEnnemyState|nil}
-	    {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface State.placedMines State.life NewEnnemyStateList}
+	    {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life NewEnnemyStateList}
 	 else
 	    NewEnnemyState=ennemyState(id:ID direction:Direction|nil)
-	    {ModifState State.pastPositions State.items State.charges State.currentPosition State.surface State.placedMines State.life {List.append State.ennemyStateList NewEnnemyState|nil}}
+	    {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life {List.append State.ennemyStateList NewEnnemyState|nil}}
 	 end
       end
    end
