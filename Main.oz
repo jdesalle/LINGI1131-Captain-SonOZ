@@ -211,12 +211,12 @@ in
 	    Position Direction ID
 	 in
 	    {Send State.port move(ID Position Direction)}
-	    if Direction== surface then
+	    {Send WindowPort movePlayer(State.id Direction)}
+	    if Direction == 'surface' then
 	       {Broadcast saySurface(ID) StateList}
 	       result(surface:true deads:nil)
 	    else
 	       {Broadcast sayMove(ID Direction) StateList}
-	       {Send WindowPort movePlayer(State.id Direction)}
 	       local
 		  KindItem ID
 	       in
