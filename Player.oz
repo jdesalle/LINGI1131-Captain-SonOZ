@@ -286,9 +286,9 @@ in
    fun{SayPassingSonar ?ID ?Answer State}
       ID=PlayerID
       if ({OS.rand}mod 2)+1 == 1 then
-	 Answer=pt(x:State.currentPosition.x y:({OS.rand} mod Input.nRow)+1)
+	 Answer=pt(x:State.currentPosition.x y:({OS.rand} mod Input.nColumn)+1)
       else
-	 Answer=pt(x:({OS.rand} mod Input.nColumn)+1 y:State.currentPosition.y)
+	 Answer=pt(x:({OS.rand} mod Input.nRow)+1 y:State.currentPosition.y)
       end
       State
    end
@@ -495,8 +495,8 @@ in
    fun{AvailablePositions}
       fun{AvailablePositionsAAA Acc X Y Result}
 	 case Acc of _|_ then
-	    if X>=Input.nColumn then
-	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 X Y+1 {List.append Result pt(x:X y:Y)|nil}}
+	    if X>=Input.nRow then
+	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
 	       else
 		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
 	       end
@@ -511,10 +511,7 @@ in
 	 end
       end
    in
-      local Res in
-	 Res={AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
-	 Res
-      end
+      {AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
    end
 
    %prends un element au hasard dans une liste
