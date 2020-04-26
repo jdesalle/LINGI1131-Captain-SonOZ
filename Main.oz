@@ -25,6 +25,24 @@ define
    PartieSS
    Turn
 in
+   %%------------Fonctions-initialisation-----
+   %create port for every player (submarine)
+   fun{CreatePortSubmarine}
+      local
+	 fun{CreatePortSubmarine Acc  Subs}
+	    case Subs of _|_ then
+	       local Acc Color
+	       in
+		  {PlayerManager.playerGenerator Subs.1 Color ID}|{CreatePortSubmarineAAA Subs.2}
+	       end
+	    []nil then nil
+	    end
+	 end
+      in
+	 {CreatePortSubmarine id(0 Input.players}
+      end
+   end%%%Return list of States-> state(id:EBNFID surface:SURFACEITEM)  Surface -> surface(surface: BOOL turnLeft:INT)
+
 %-----------------States Functions----------------
 %%%%%create a state from the differents agruments
    fun{SetState ID Port Surface}
@@ -68,40 +86,9 @@ in
 	 end
       end
    end
-   %%create a list of state from the open ports %%%maybe have to modify this one for the ID?
-   fun{InitStateList PortList}
-      local
-	 fun{InitStateList Acc PortList}
-	    case PortList of nil then nil
-	    []H|T then
-	       {SetState Acc H surface(surface:true timeLeft:0)}|{InitStateList Acc+1 T}
-	    end
-	 end
-      in
-	 case PortList of nil then nil
-	 []H|T then
-	    {SetState 0 H surface(surface:true timeLeft:0)}|{InitStateList 1 T}
-	 end
-      end
-   end
- %%------------Fonctions-initialisation-----
-   %create port for every player (submarine)
-   fun{CreatePortSubmarine}
-      local
-	 fun{CreatePortSubmarineAAA Subs}
-	    case Subs of _|_ then
-	       local ID Color
-	       in
-		  {PlayerManager.playerGenerator Subs.1 Color ID}|{CreatePortSubmarineAAA Subs.2}
-	       end
-	    []nil then nil
-	    end
-	 end
-      in
-	 {CreatePortSubmarineAAA Input.players}
-      end
-   end
-%------------Broadcats fucntions-----------------
+   
+   
+ %------------Broadcats fucntions-----------------
    proc{Broadcast Message StateList}
       case StateList of nil then skip
       []H|T then
@@ -303,16 +290,15 @@ in
       end
    end
 %---------------------Initialisation-----------
+%%%after this: WindowPort Built, PortsSubmarines=List of Subma StateList=doublon?
    thread
       {System.show 'Main Thread Started'}
       WindowPort={GUI.portWindow}
       {Send WindowPort buildWindow}
-      PortsSubmarines={CreatePortSubmarine}
-      StateList={InitStateList PortsSubmarines}
+      Statelist={CreatePortSubmarine}
       {System.show 'StateList and above Initialized'}
      % {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn. FAILS because IdPlayer not defin
-      {Send WindowPort putMine(1 pt(x:1 y:1))}%does nothing idk why
-      {Send PortsSubmarines.1 sayMove(1 'east')}
+      {Send WindowPort putMine(1 pt(x:1 y:1))}%does nothing idk why? ->Should now which player put it for the color 
       {System.show 'Reached end of main thread sucessfully'}
    end
 %---------------Jeu-------------
