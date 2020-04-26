@@ -29,19 +29,8 @@ in
    %create port for every player (submarine)
    fun{CreatePortSubmarine}
       local
-	 fun{CreatePortSubmarine Acc  Subs}
-	    case Subs of _|_ then
-	       local Acc Color
-	       in
-		  {PlayerManager.playerGenerator Subs.1 Color ID}|{CreatePortSubmarineAAA Subs.2}
-	       end
-	    []nil then nil
-	    end
-	 end
-      in
-	 {CreatePortSubmarine id(0 Input.players}
-      end
-   end%%%Return list of States-> state(id:EBNFID surface:SURFACEITEM)  Surface -> surface(surface: BOOL turnLeft:INT)
+	 {PlayerManager.playerGenerator Subs.1 Color ID}|{CreatePortSubmarineAAA Subs.2}
+   end%%%Return list of States-> state(id:EBNFID port:PLAYERPORT surface:SURFACEITEM)  Surface -> surface(surface: BOOL turnLeft:INT)
 
 %-----------------States Functions----------------
 %%%%%create a state from the differents agruments
@@ -88,7 +77,7 @@ in
    end
    
    
- %------------Broadcats fucntions-----------------
+ %------------Broadcats functions-----------------
    proc{Broadcast Message StateList}
       case StateList of nil then skip
       []H|T then
@@ -297,8 +286,6 @@ in
       {Send WindowPort buildWindow}
       Statelist={CreatePortSubmarine}
       {System.show 'StateList and above Initialized'}
-     % {Send WindowPort initPlayer(IdPlayers.1 pt(x:1 y:1))}%Change to make random spawn. FAILS because IdPlayer not defin
-      {Send WindowPort putMine(1 pt(x:1 y:1))}%does nothing idk why? ->Should now which player put it for the color 
       {System.show 'Reached end of main thread sucessfully'}
    end
 %---------------Jeu-------------
