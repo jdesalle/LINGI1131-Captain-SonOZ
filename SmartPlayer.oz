@@ -1,6 +1,4 @@
 functor
-   %TODO AJOUTER A CHAQUE STATE l'ARGUMENT ennemyStateList:EnnemyState, implementer les fonctions dans fireITem et FireMine
-   %Verifier l'initilisation correcte
 import
    Input
    System
@@ -454,11 +452,11 @@ in
 
 
 
-   %Returns a list of positions pt(x:X y:Y) where there is no island
+    %Returns a list of positions pt(x:X y:Y) where there is no island
    fun{AvailablePositions}
       fun{AvailablePositionsAAA Acc X Y Result}
 	 case Acc of _|_ then
-	    if X>=Input.nColumn then
+	    if X>=Input.nRow then
 	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
 	       else
 		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
@@ -474,10 +472,7 @@ in
 	 end
       end
    in
-      local Res in
-	 Res={AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
-	 Res
-      end
+      {AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
    end
 
    %prends un element au hasard dans une liste
