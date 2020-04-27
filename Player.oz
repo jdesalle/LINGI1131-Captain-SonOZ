@@ -35,16 +35,13 @@ define
    ModifState
    AvailablePositions
    PickRandom
-   Spawn
    PositionsAva
    ManhattanDistance
    PositionsInRange
 in
 
-   thread
-      PositionsAva={AvailablePositions}%position ou il n'y a pas d'iles
-      Spawn={PickRandom PositionsAva}% un spawn choisi au hasard
-   end
+     
+  
 
 
 
@@ -186,8 +183,8 @@ in
 
    fun{InitPosition ?ID ?Position}
       ID=PlayerID
-      Position=Spawn
-      {ModifState nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage}
+      Position={PickRandom PositionsAva}% un spawn choisi au hasard
+      {ModifState Position|nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage}
       %le premier tour on est surface et au tour suivant on peut dive Verifier que le surface time est correct.
    end
 
@@ -228,8 +225,8 @@ in
    fun{SayMissileExplode ID Position ?Message State}
       local Dis in
 	 Dis={ManhattanDistance State Position}
-   if Dis==null then
-    Message=sayDamageTaken(ID 0 State.life)
+	 if Dis==null then
+	    Message=sayDamageTaken(ID 0 State.life)
 	 elseif State.life - Dis =<0 then
 	    Message=sayDeath(ID)
 	 else
@@ -243,8 +240,8 @@ in
    fun{SayMineExplode ID Position ?Message State} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
       local Dis in
 	 Dis={ManhattanDistance State Position}
-   if Dis==null then
-   Message=sayDamageTaken(ID 0 State.life)
+	 if Dis==null then
+	    Message=sayDamageTaken(ID 0 State.life)
 	 elseif State.life-Dis=<0 then
 	    Message=sayDeath(ID)
 	 else Message=sayDamageTaken(ID Dis State.life-Dis)
@@ -356,7 +353,7 @@ in
 	    if Directs==nil then
 	       Direction='surface'
 	       Position=State.currentPosition
-	       {ModifState nil State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life}
+	       {ModifState Position|nil State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life}
 	    else
 	       local X  IsNotX Possible in
 		  X={PickRandom Directs}
@@ -368,7 +365,7 @@ in
 		  end
           %la fonction isPossible teste si on peut aller dans cette direction
 		  Possible={IsPossible X}
-		  if Possible.bool then
+		  if Possible.bool==true then
 		     Direction=X
 		     Position=Possible.position
 		     {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life}
@@ -494,27 +491,27 @@ in
 
 
    %Returns a list of positions pt(x:X y:Y) where there is no island
-   fun{AvailablePositions}
-      fun{AvailablePositionsAAA Acc X Y Result}
-	 case Acc of _|_ then
-	    if X>=Input.nRow then
-	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
-	       end
+  fun{AvailablePositions}
+   fun{AvailablePositionsAAA Acc X Y Result}
+      case Acc of _|_ then
+	 if Y>=Input.nColumn then
+	    if Acc.1\=1 then {AvailablePositionsAAA Acc.2 X+1 1 {List.append Result pt(x:X y:Y)|nil}}
 	    else
-	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 X+1 Y Result}
-	       end
+	       {AvailablePositionsAAA Acc.2 X+1 1 Result}
 	    end
-	 []nil then
-	    Result.2 %on est au bout, on skip le premier element qui est 000
+	 else
+	    if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X Y+1 {List.append Result pt(x:X y:Y)|nil}}
+	    else
+	       {AvailablePositionsAAA Acc.2 X Y+1 Result}
+	    end
 	 end
+      []nil then
+	 Result
       end
-   in
-      {AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
    end
+in
+   {AvailablePositionsAAA {List.flatten Input.map} 1 1 nil}
+end
 
    %prends un element au hasard dans une liste
    fun{PickRandom Liste}
@@ -557,4 +554,12 @@ in
 	 end
       end
    end
+
+
+
+   PositionsAva={AvailablePositions}%position ou il n'y a pas d'iles
+   
+
+
+   
 end

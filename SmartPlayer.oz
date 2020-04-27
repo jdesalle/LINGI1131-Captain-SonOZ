@@ -35,7 +35,6 @@ define
    ModifState
    AvailablePositions
    PickRandom
-   Spawn
    PositionsAva
    ManhattanDistance
    PositionsInRange
@@ -46,10 +45,9 @@ define
    EditEnnemyStateList
 in
 
-   thread
-      PositionsAva={AvailablePositions}%position ou il n'y a pas d'iles
-      Spawn={PickRandom PositionsAva}% un spawn choisi au hasard
-   end
+   
+      
+     
 
 
    % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life ennemyStateList:ennemyState(id:ID direction:DirectionList)|...|nil)
@@ -187,8 +185,8 @@ in
 
    fun{InitPosition ?ID ?Position}
       ID=PlayerID
-      Position=Spawn
-      {ModifState nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage nil}
+      Position={PickRandom PositionsAva}% un spawn choisi au hasard
+      {ModifState Position|nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage nil}
       %le premier tour on est surface et au tour suivant on peut dive Verifier que le surface time est correct.
    end
 
@@ -330,7 +328,7 @@ in
 	 else
 	    Position=pt(x:CurrentX y:CurrentY)
 	    Direction='surface'
-	    {ModifState nil State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life State.ennemyStateList}
+	    {ModifState Position State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life State.ennemyStateList}
 	 end
       end
    end
@@ -454,26 +452,26 @@ in
 
     %Returns a list of positions pt(x:X y:Y) where there is no island
    fun{AvailablePositions}
-      fun{AvailablePositionsAAA Acc X Y Result}
-	 case Acc of _|_ then
-	    if X>=Input.nRow then
-	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 1 Y+1 {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 1 Y+1 Result}
-	       end
+   fun{AvailablePositionsAAA Acc X Y Result}
+      case Acc of _|_ then
+	 if Y>=Input.nColumn then
+	    if Acc.1\=1 then {AvailablePositionsAAA Acc.2 X+1 1 {List.append Result pt(x:X y:Y)|nil}}
 	    else
-	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X+1 Y {List.append Result pt(x:X y:Y)|nil}}
-	       else
-		  {AvailablePositionsAAA Acc.2 X+1 Y Result}
-	       end
+	       {AvailablePositionsAAA Acc.2 X+1 1 Result}
 	    end
-	 []nil then
-	    Result.2 %on est au bout, on skip le premier element qui est 000
+	 else
+	    if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X Y+1 {List.append Result pt(x:X y:Y)|nil}}
+	    else
+	       {AvailablePositionsAAA Acc.2 X Y+1 Result}
+	    end
 	 end
+      []nil then
+	 Result
       end
-   in
-      {AvailablePositionsAAA {List.flatten Input.map} 1 1 000|nil}
    end
+in
+   {AvailablePositionsAAA {List.flatten Input.map} 1 1 nil}
+end
 
    %prends un element au hasard dans une liste
    fun{PickRandom Liste}
@@ -649,11 +647,11 @@ in
 	    end
 	 end
 
-	 fun{IsInStateList ID List} %To check if player is in stateList
-	    case List of _|_ then
-	       if List.1.id==ID then true
+	 fun{IsInStateList ID Liste} %To check if player is in stateList
+	    case Liste of _|_ then
+	       if Liste.1.id==ID then true
 	       else
-		  {IsInStateList ID List.2}
+		  {IsInStateList ID Liste.2}
 	       end
 	    []nil then false
 	    end
@@ -675,4 +673,8 @@ in
    end
 
   % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life otherPlayersState:OtherPlayersStateList)
+
+PositionsAva={AvailablePositions}%position ou il n'y a pas d'iles
+
+   
 end
