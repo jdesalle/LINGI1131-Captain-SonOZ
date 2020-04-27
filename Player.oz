@@ -29,9 +29,6 @@ define
    SayDeath
    SayDamageTaken
    %Added By me
-   PlayerID %assignes par la fonction startplayer qui est appellee par le playerGenerator qui est lui meme appelle quand on cree les ports dans le main
-   %L'ID est assigne par la fonction StartPlayer qui est apellee avec les bons arguments dans le player generator.
-   %Le playerGenerator est appell� quand on cree les ports dans le main
    ModifState
    AvailablePositions
    PickRandom
@@ -39,127 +36,119 @@ define
    ManhattanDistance
    PositionsInRange
 in
-
-     
-  
-
-
-
    % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life)
-   proc{TreatStream Stream State}
+   proc{TreatStream Stream State PlayerID}
       case Stream of initPosition(ID Position)|T then
 	 {System.show 'treating initPosition'}
-	 {TreatStream T {InitPosition ?ID ?Position}}
-
-
+	 {TreatStream T {InitPosition ?ID ?Position PlayerID} PlayerID}
 	 %----------------Actions--------
       []move(ID Position Direction)|T then
 	 if State.life=<0 then
 	    ID=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {Move ?ID ?Position ?Direction State}}
+	    {TreatStream T {Move ?ID ?Position ?Direction State PlayerID} PlayerID}
 	 end
 
       []dive|T then
-	 {TreatStream T {Dive State}}
+	 {TreatStream T {Dive State} PlayerID}
       []chargeItem(ID KindItem)|T then
 	 if State.life=<0 then
 	    ID=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {ChargeItem ?ID ?KindItem State}}
+	    {TreatStream T {ChargeItem ?ID ?KindItem State PlayerID} PlayerID}
 	 end
 
       []fireItem(ID KindFire)|T then
 	 if State.life=<0 then
 	    ID=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {FireItem ?ID ?KindFire State}}
+	    {TreatStream T {FireItem ?ID ?KindFire State PlayerID} PlayerID}
 	 end
 
       []fireMine(ID Mine)|T then
 	 if State.life=<0 then
 	    ID=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {FireMine ?ID ?Mine State}}
+	    {TreatStream T {FireMine ?ID ?Mine State PlayerID} PlayerID}
 	 end
 
       []isDead(Answer)|T then
-	 {TreatStream T {IsDead ?Answer State}}
+	 {TreatStream T {IsDead ?Answer State} PlayerID}
       %--------------Messages-
 
       []sayMove(ID Direction)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayMove ID Direction State}}
+	    {TreatStream T {SayMove ID Direction State} PlayerID}
 	 end
       []saySurface(ID)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SaySurface ID State}}
+	    {TreatStream T {SaySurface ID State} PlayerID}
 	 end
       []sayCharge(ID KindItem)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayCharge ID KindItem State}}
+	    {TreatStream T {SayCharge ID KindItem State} PlayerID}
 	 end
       []sayMinePlaced(ID)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayMinePlaced ID State}}
+	    {TreatStream T {SayMinePlaced ID State} PlayerID}
 	 end
       []sayMissileExplode(ID Position Message)|T then
 	 if ID== null then
 	    Message=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayMissileExplode ID Position ?Message State}}
+	    {TreatStream T {SayMissileExplode ID Position ?Message State PlayerID} PlayerID}
 	 end
       []sayMineExplode(ID Position Message)|T then
 	 if ID== null then
 	    Message=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayMineExplode ID Position ?Message State}}
+	    {TreatStream T {SayMineExplode ID Position ?Message State PlayerID} PlayerID}
 	 end
       []sayPassingDrone(Drone ID Answer)|T then
 	 if State.life=<0 then %Je suis pas sur pour ceci qu'il faille bind Answer a null aussi
 	    ID=null
 	    Answer=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayPassingDrone Drone ?ID ?Answer State}}
+	    {TreatStream T {SayPassingDrone Drone ?ID ?Answer State PlayerID} PlayerID}
 	 end
       []sayAnswerDrone(Drone ID Answer)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayAnswerDrone Drone ID Answer State}}
+	    {TreatStream T {SayAnswerDrone Drone ID Answer State} PlayerID}
 	 end
       []sayPassingSonar(ID Answer)|T then
 	 if State.life=<0 then %Je suis pas sur pour ceci qu'il faille bind Answer a null aussi
 	    ID=null
 	    Answer=null
-	    {TreatStream T State}
+	    {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayPassingSonar ?ID ?Answer State}}
+	    {TreatStream T {SayPassingSonar ?ID ?Answer State PlayerID} PlayerID}
 	 end
       []sayAnswerSonar(ID Answer)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayAnswerSonar ID Answer State}}
+	    {TreatStream T {SayAnswerSonar ID Answer State} PlayerID}
 	 end
       []sayDeath(ID)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayDeath ID State}}
+	    {TreatStream T {SayDeath ID State} PlayerID}
 	 end
       []sayDamageTaken(ID Damage LifeLeft)|T then
-	 if ID== null then {TreatStream T State}
+	 if ID== null then {TreatStream T State PlayerID}
 	 else
-	    {TreatStream T {SayDamageTaken ID Damage LifeLeft State}}
+	    {TreatStream T {SayDamageTaken ID Damage LifeLeft State} PlayerID}
 	 end
       end
    end
@@ -171,17 +160,18 @@ in
    fun{StartPlayer Color ID}%Ici l'ID et la couleur sont deja assignes par le player generator, on peut les recuperer je pense. Sinon ca couille mon player
       Stream
       Port
+      PlayerID
    in
       {NewPort Stream Port}
       thread
 	 PlayerID=id(id:ID color:Color name:'playerstupid')
-	 {TreatStream Stream nil}
+	 {TreatStream Stream nil PlayerID}
       end
       Port
    end
 
 
-   fun{InitPosition ?ID ?Position}
+   fun{InitPosition ?ID ?Position PlayerID}
       ID=PlayerID
       Position={PickRandom PositionsAva}% un spawn choisi au hasard
       {ModifState Position|nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage}
@@ -222,36 +212,44 @@ in
    end
 
 
-   fun{SayMissileExplode ID Position ?Message State}
-      local Dis in
+   fun{SayMissileExplode ID Position ?Message State PlayerID}
+   {System.show 'player of ID'#ID#'has made a missile explode at position'#Position#'this player:'#PlayerID#'Is updating its life accordingly'}
+      local Dis Dam  in
 	 Dis={ManhattanDistance State Position}
 	 if Dis==null then
-	    Message=sayDamageTaken(ID 0 State.life)
+	    Message=sayDamageTaken(PlayerID 0 State.life)
+      Dam=0
 	 elseif State.life - Dis =<0 then
-	    Message=sayDeath(ID)
+	    Message=sayDeath(PlayerID)
+      Dam=Dis
 	 else
-	    Message=sayDamageTaken(ID Dis State.life-Dis)
+	    Message=sayDamageTaken(PlayerID Dis State.life-Dis)
+      Dam=Dis
 	 end
 	 {System.show Message}
-	 State
+	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Dam}
       end
    end
 
-   fun{SayMineExplode ID Position ?Message State} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
-      local Dis in
+   fun{SayMineExplode ID Position ?Message State PlayerID} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
+   {System.show 'player of ID'#ID#'has made a mine explode at position'#Position#'this player:'#PlayerID#'Is updating its life accordingly'}
+      local Dis Dam in
 	 Dis={ManhattanDistance State Position}
 	 if Dis==null then
-	    Message=sayDamageTaken(ID 0 State.life)
+	    Message=sayDamageTaken(PlayerID 0 State.life)
+      Dam=0
 	 elseif State.life-Dis=<0 then
-	    Message=sayDeath(ID)
-	 else Message=sayDamageTaken(ID Dis State.life-Dis)
+	    Message=sayDeath(PlayerID)
+      Dam=Dis
+	 else Message=sayDamageTaken(PlayerID Dis State.life-Dis)
+   Dam=Dis
 	 end
 	 {System.show Message}
-	 State
+	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Dam}
       end
    end
 
-   fun{SayPassingDrone Drone ?ID ?Answer State}
+   fun{SayPassingDrone Drone ?ID ?Answer State PlayerID}
       ID=PlayerID
       case Drone of drone(row X) then %Je suis pas sur que le case of drone(row x) soit syntaxiquement correct. A tester.
 	 if X==State.currentPosition.x then Answer=true
@@ -277,12 +275,12 @@ in
 
 
    fun{SayDamageTaken ID Damage LifeLeft State}
-      {System.show 'Player of ID ' #ID# ' has taken '#Damage# 'damage. He still has ' #LifeLeft# ' lives' }
+      {System.show 'Player of ID '#ID#' has taken '#Damage#'damage He still has '#LifeLeft#' lives'}
       State
    end
 
    %On renvoie notre position avec au hasard soit x soit y qui est correct. La position incorrecte est generee au hasard
-   fun{SayPassingSonar ?ID ?Answer State}
+   fun{SayPassingSonar ?ID ?Answer State PlayerID}
       ID=PlayerID
       if ({OS.rand}mod 2)+1 == 1 then
 	 Answer=pt(x:State.currentPosition.x y:({OS.rand} mod Input.nColumn)+1)
@@ -293,7 +291,7 @@ in
    end
 
    fun{SayAnswerSonar ID Answer State}
-      {System.show 'Player of ID' #ID# ' has been identified by a sonar at position ' #Answer}
+      {System.show 'Player of ID'#ID#' has been identified by a sonar at position '#Answer}
       State
    end
 
@@ -304,7 +302,7 @@ in
    %----------------------------------------------
    %On bouge randomly. Si on sait pas bouger on surface
    %retourne le nouveau state
-   fun{Move ?ID ?Position ?Direction State}
+   fun{Move ?ID ?Position ?Direction State PlayerID}
       ID=PlayerID
       local CardDirections Choose IsPossible in
 	 CardDirections= 'east'|'west'|'south'|'north'|nil
@@ -381,7 +379,7 @@ in
 
 
    %Si on peut charger on charge le missile en premier, sinon la mine, sinon le drone, sinon le sonar.
-   fun{ChargeItem ?ID ?KindItem State}
+   fun{ChargeItem ?ID ?KindItem State PlayerID}
       ID=PlayerID
       if State.charges.missile+1<Input.missile then
 	 KindItem=missile
@@ -411,7 +409,7 @@ in
    end
 
    %On tire d'abord un missile, si on a pas ce sera une mine, un drone et puis un sonar et sinon rien. On tire a une position random
-   fun{FireItem ?ID ?KindFire State}
+   fun{FireItem ?ID ?KindFire State PlayerID}
       ID=PlayerID
       local CanFire in
 	 fun{CanFire Item State}
@@ -419,18 +417,22 @@ in
 	 end
 	 if {CanFire 'missile' State} then
 	    KindFire=missile({PickRandom {PositionsInRange missile PositionsAva State}})%ducoup on peut se tirer sur soi meme
+      {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	    {ModifState State.pastPosition items(missile:State.items.missile-1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 elseif {CanFire 'mine' State} then
 	    local MinePosition in
 	       MinePosition={PickRandom {PositionsInRange mine PositionsAva State}}
 	       KindFire=mine(MinePosition) %Strategie pourrie mais en theorie on arrive pas la car on charge toujours le missile en premier et si c'est charge on le tire...
+         {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	       {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine-1 sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface {List.append State.placedMines MinePosition|nil} State.life}
 	    end
 	 elseif {CanFire 'drone' State} then
 	    KindFire=drone(row {PickRandom PositionsAva}.y)% meme chose
+      {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone-1) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 elseif {CanFire 'sonar' State} then
 	    KindFire=sonar
+     {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar-1 drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 else
 	    KindFire=null
@@ -441,10 +443,11 @@ in
 
    %makes a previously placed mine explode
    %Si on a une ou plusieur mines on en fait exploser une au hasard.
-   fun{FireMine ?ID ?Mine State}
+   fun{FireMine ?ID ?Mine State PlayerID}
       ID=PlayerID
       case State.placedMines of _|_ then
 	 Mine={PickRandom State.placedMines}
+    {System.show 'Player of ID:'#ID#' has detonated a mine at position '#Mine#'!'}
 	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life}
       []nil then
 	 Mine=null
@@ -491,27 +494,27 @@ in
 
 
    %Returns a list of positions pt(x:X y:Y) where there is no island
-  fun{AvailablePositions}
-   fun{AvailablePositionsAAA Acc X Y Result}
-      case Acc of _|_ then
-	 if Y>=Input.nColumn then
-	    if Acc.1\=1 then {AvailablePositionsAAA Acc.2 X+1 1 {List.append Result pt(x:X y:Y)|nil}}
+   fun{AvailablePositions}
+      fun{AvailablePositionsAAA Acc X Y Result}
+	 case Acc of _|_ then
+	    if Y>=Input.nColumn then
+	       if Acc.1\=1 then {AvailablePositionsAAA Acc.2 X+1 1 {List.append Result pt(x:X y:Y)|nil}}
+	       else
+		  {AvailablePositionsAAA Acc.2 X+1 1 Result}
+	       end
 	    else
-	       {AvailablePositionsAAA Acc.2 X+1 1 Result}
+	       if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X Y+1 {List.append Result pt(x:X y:Y)|nil}}
+	       else
+		  {AvailablePositionsAAA Acc.2 X Y+1 Result}
+	       end
 	    end
-	 else
-	    if Acc.1 \=1 then {AvailablePositionsAAA Acc.2 X Y+1 {List.append Result pt(x:X y:Y)|nil}}
-	    else
-	       {AvailablePositionsAAA Acc.2 X Y+1 Result}
-	    end
+	 []nil then
+	    Result
 	 end
-      []nil then
-	 Result
       end
+   in
+      {AvailablePositionsAAA {List.flatten Input.map} 1 1 nil}
    end
-in
-   {AvailablePositionsAAA {List.flatten Input.map} 1 1 nil}
-end
 
    %prends un element au hasard dans une liste
    fun{PickRandom Liste}
@@ -555,11 +558,6 @@ end
       end
    end
 
-
-
    PositionsAva={AvailablePositions}%position ou il n'y a pas d'iles
-   
 
-
-   
 end
