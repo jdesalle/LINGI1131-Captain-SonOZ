@@ -6,13 +6,11 @@ import
    System
 define
    WindowPort
-   PortsSubmarines
    CreatePortSubmarine
    InitPosition
 %%%StateFunction
    StateList
    SetState%%%%to set the state
-   InitStateList %%%initiate StateList from portlist
    UpdateSurf
    Alive
    ProcessStream
@@ -21,10 +19,15 @@ define
    Broadcast
    BroadcastFire
    BroadcastMine
-   %%Partie tour par tour
+   %%Parties and related functions
    PartieTT
    PartieSS
+   SimulateThinking
    Turn
+   Move
+   Charge
+   Mine
+   Fire
 in
    %%------------Fonctions-initialisation-----
    %create port for every player (submarine)
@@ -38,7 +41,7 @@ in
 		  Name={List.nth Input.players Acc+1}
 		  Color={List.nth Input.colors Acc+1}
 		  Port={PlayerManager.playerGenerator Name Color Acc}
-		  surface(id:Acc port:Port surface:surface(surface:true timeLeft:0))|{CreatPortSubmarine Acc+1}
+		  surface(id:id(id:Acc color:Color name:Name) port:Port surface:surface(surface:true timeLeft:0))|{CreatPortSubmarine Acc+1}
 	       else
 		  nil
 	       end
@@ -58,6 +61,7 @@ in
 	 end
       end
    end
+   
 %-----------------States Functions----------------
 %%%%%create a state from the differents agruments
    fun{SetState ID Port Surface}
@@ -121,23 +125,32 @@ in
 	    in
 	       {Send H.port sayMissileExplode(ID Position Message)}
 	       case Message of nil then {BroadcastFire ID KindFire T}
-	       []sayDeath(Dead)then
+	       []sayDeath(ID)then
 		  {Broadcast Message StateList}
-		  Dead|{BroadcastFire ID KindFire T}
-	       []sayDamageTaken(Infos) then
+		  {Send WindowPort lifeUpdate(ID 0)}
+		  {Send WindowPort removePlayer(ID)}
+		  ID|{BroadcastFire ID KindFire T}
+	       []sayDamageTaken(ID Damage LifeLeft) then
+		  {Send WindowPort lifeUpdate(ID LifeLeft)}
 		  {Broadcast Message StateList}
 		  {BroadcastFire ID KindFire T}
 	       end
 	    end
 	 end
       []mine(Position) then
-	 {Broadcast sayMinePlaced(ID)StateList}
+	 {Broadcast sayMinePlaced(ID) StateList}
+	 {Send WindowPort putMine(ID Position)}
 	 nil
       []drone then
 	 local
 	    Answer
 	 in
 	    case StateList of nil then nil
+	    []H|nil then
+	       {Send H.port sayPassingDrone(drone H.id Answer)}
+	       {Send ID sayAnswerDrone(drone H.id Answer)}
+	       {Send WindowPort drone(ID drone)}
+	       nil
 	    []H|T then
 	       {Send H.port sayPassingDrone(drone H.id Answer)}
 	       {Send ID sayAnswerDrone(drone H.id Answer)}
@@ -200,6 +213,55 @@ in
       end
    end
 %---------------Turn and games Function---------------
+
+   fun{Move Port StateList}
+       local
+	    Position Direction ID
+	 in
+	    {Send Port move(ID Position Direction)}
+	    {Send WindowPort movePlayer(ID Direction)}
+	    if Direction == 'surface' then
+	       {Broadcast saySurface(ID) StateList}
+	       false
+	    else
+	       {Broadcast sayMove(ID Direction) StateList}
+	       true
+	    end
+       end
+   end
+   proc{Charge Port StateList}
+       local
+	  ID KindItem
+       in
+	  {Send Port chargeItem(ID KindItem)}
+	  if KindItem \= null then
+	     {Broadcast sayCharge(ID KindItem) StateList}
+	  end
+       end
+   end
+   fun{Fire Port StateList}
+       local
+	  KindFire  ID
+       in
+	  {Send Port fireItem(ID KindFire)}
+	  if KindFire \= null then
+	     {Alive StateList {BroadcastFire ID KindFire StateList}}
+	  else
+	     StateList
+	  end
+       end
+   end
+   fun{Mine Port StateList Dead1}
+      local
+	 Mine ID
+      in
+	 if Mine \=null then
+	    {BroadcastMine ID Mine Dead1}
+	 else
+	    Dead1
+	 end
+      end
+   end
    fun{Turn State StateList S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
 	 result(surface:true deads:nil)
@@ -207,52 +269,23 @@ in
 	 if State.surface.surface==true then
 	    {Send State.port dive}
 	 end
-	 local
-	    Position Direction ID
-	 in
-	    {Send State.port move(ID Position Direction)}
-	    {Send WindowPort movePlayer(State.id Direction)}
-	    if Direction == 'surface' then
-	       {Broadcast saySurface(ID) StateList}
-	       result(surface:true deads:nil)
-	    else
-	       {Broadcast sayMove(ID Direction) StateList}
-	       local
-		  KindItem ID
-	       in
-		  {Send State.port charge(ID KindItem)}
-		  if KindItem \= null then
-		     {Broadcast sayCharge(ID KindItem) StateList}
-		  end
-		  local
-		     KindFire Dead1 ID
-		  in
-		     {Send State.port fireItem(ID KindFire)}
-		     if KindFire \= null then
-			Dead1={Alive StateList {BroadcastFire ID KindFire StateList}}
-		     else
-			Dead1=StateList
-		     end
-		     local
-			Mine Dead ID
-		     in
-			if Mine \=null then
-			   Dead={BroadcastMine ID Mine Dead1}
-			else
-			   Dead=Dead1
-			end
-			   result(surface:false deads:Dead id:State.id)
-		     end
-		  end
-	       end
+	 if {Move State.port StateList}==false then
+	    result(surface:true deads:nil)
+	 else
+	    {Charge State.Port StateList}
+	    local Dead1 Dead in
+	       Dead1={Fire State.port StateList}
+	       Dead={Mine State.port StateList Dead1}
+	       result(surface:false deads:Dead id:State.id)
 	    end
 	 end
       end
    end
+     
    fun{PartieTT StateList}
       local
 	 fun {GetTurn Current StateList}
-	    case StateList of nil then {PartieTT StateList}
+	    case StateList of nil then nil
 	    []H|T then
 	       local Result Surf in
 		  Result= {Turn H StateList false}
@@ -268,7 +301,7 @@ in
       in
 	 case StateList of nil then nil
 	 []H|nil then H
-	 []_|_ then
+	 []H|T then
 	    {GetTurn StateList StateList}
 	 end
       end
@@ -290,7 +323,7 @@ in
 	 in
 	    case StateList of nil then nil
 	    []H|nil then H
-	    []_|_ then
+	    []H|T then
 	       Stream={OpenThreads StateList StateList}
 	       thread
 		  Stream2={ProcessStream Stream StateList}
