@@ -219,15 +219,15 @@ in
 	 if Dis==0 then
 	    Damage=2
 	    if State.life-2>0 then
-	       Message=sayDamageTaken(ID 2 State.life-2)
-	    else Message=sayDeath(ID)
+	       Message=sayDamageTaken(PlayerID 2 State.life-2)
+	    else Message=sayDeath(PlayerID)
 	    end
 	 elseif Dis==1 then
 	    Damage=1
 	    if State.life-1>0 then
-	       Message=sayDamageTaken(ID 1 State.life-1)
+	       Message=sayDamageTaken(PlayerID 1 State.life-1)
 	    else
-	       Message=sayDeath(ID)
+	       Message=sayDeath(PlayerID)
 	    end
 	 else
 	    Damage=0
@@ -245,15 +245,15 @@ in
 	 if Dis==0 then
 	    Damage=2
 	    if State.life-2>0 then
-	       Message=sayDamageTaken(ID 2 State.life-2)
-	    else Message=sayDeath(ID)
+	       Message=sayDamageTaken(PlayerID 2 State.life-2)
+	    else Message=sayDeath(PlayerID)
 	    end
 	 elseif Dis==1 then
 	    Damage=1
 	    if State.life-1>0 then
-	       Message=sayDamageTaken(ID 1 State.life-1)
+	       Message=sayDamageTaken(PlayerID 1 State.life-1)
 	    else
-	       Message=sayDeath(ID)
+	       Message=sayDeath(PlayerID)
 	    end
 	 else
 	    Damage=0
