@@ -115,7 +115,7 @@ in
 	    {TreatStream T {SayMineExplode ID Position ?Message State PlayerID} PlayerID}
 	 end
       []sayPassingDrone(Drone ID Answer)|T then
-	 if State.life=<0 then %Je suis pas sur pour ceci qu'il faille bind Answer a null aussi
+	 if State.life=<0 then
 	    ID=null
 	    Answer=null
 	    {TreatStream T State PlayerID}
@@ -128,7 +128,7 @@ in
 	    {TreatStream T {SayAnswerDrone Drone ID Answer State} PlayerID}
 	 end
       []sayPassingSonar(ID Answer)|T then
-	 if State.life=<0 then %Je suis pas sur pour ceci qu'il faille bind Answer a null aussi
+	 if State.life=<0 then
 	    ID=null
 	    Answer=null
 	    {TreatStream T State PlayerID}
@@ -153,11 +153,10 @@ in
       end
    end
 
-
    %----------------------------------------------------
-   %------------Fonctions Initialisation----------------
+   %------------Initialisation--------------------------
    %----------------------------------------------------
-   fun{StartPlayer Color ID}%Ici l'ID et la couleur sont deja assignes par le player generator, on peut les recuperer je pense. Sinon ca couille mon player
+   fun{StartPlayer Color ID}
       Stream
       Port
       PlayerID
@@ -173,14 +172,13 @@ in
 
    fun{InitPosition ?ID ?Position PlayerID}
       ID=PlayerID
-      Position={PickRandom PositionsAva}% un spawn choisi au hasard
+      Position={PickRandom PositionsAva}% Spawn is selected randomly
       {ModifState Position|nil items(missile:0 mine:0 sonar:0 drone:0) charges(missile:0 mine:0 sonar:0 drone:0) Position surface(surface:true time:0) nil Input.maxDamage}
-      %le premier tour on est surface et au tour suivant on peut dive Verifier que le surface time est correct.
    end
 
 
    %-------------------------------------------------
-   %-------Fonctions pour les messages:--------------
+   %-------Messages----------------------------------
    %-------------------------------------------------
    fun{IsDead ?Answer State}
       if State.life=<0 then Answer=true
@@ -192,28 +190,28 @@ in
    end
 
    fun{SayMove ID Direction State}
-      {System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
+      %{System.show 'Player of ID:'#ID#'is moving'#Direction#'!'}
       State
    end
 
    fun{SaySurface ID State}
-      {System.show 'Player of ID:'#ID#'is surfacing!'}
+      %{System.show 'Player of ID:'#ID#'is surfacing!'}
       State
    end
 
    fun{SayCharge ID KindItem State}
-      {System.show 'Player of ID:'#ID#' has charged '#KindItem#'!'}
+      %{System.show 'Player of ID:'#ID#' has charged '#KindItem#'!'}
       State
    end
 
    fun{SayMinePlaced ID State}
-      {System.show 'Player of ID:'#ID#' has placed a mine somewhere!'}
+      %{System.show 'Player of ID:'#ID#' has placed a mine somewhere!'}
       State
    end
 
 
    fun{SayMissileExplode ID Position ?Message State PlayerID}
-      {System.show 'player of ID'#ID#'has made a missile explode at position'#Position#'this player:'#PlayerID#' at position'#State.currentPosition#'Is updating its life accordingly. CurrentLife:'#State.life}
+      %{System.show 'player of ID'#ID#'has made a missile explode at position'#Position#'this player:'#PlayerID#' at position'#State.currentPosition#'Is updating its life accordingly. CurrentLife:'#State.life}
       local Dis Damage in
 	 Dis={ManhattanDistance State.currentPosition Position}
 	 if Dis==0 then
@@ -233,13 +231,13 @@ in
 	    Damage=0
 	    Message=null
 	 end
-	 {System.show Message}
+	 %{System.show Message}
 	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Damage}
       end
    end
 
-   fun{SayMineExplode ID Position ?Message State PlayerID} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
-          {System.show 'player of ID'#ID#'has made a mine explode at position'#Position#'this player:'#PlayerID#' at position'#State.currentPosition#'Is updating its life accordingly. CurrentLife:'#State.life}
+   fun{SayMineExplode ID Position ?Message State PlayerID}
+          %{System.show 'player of ID'#ID#'has made a mine explode at position'#Position#'this player:'#PlayerID#' at position'#State.currentPosition#'Is updating its life accordingly. CurrentLife:'#State.life}
       local Dis Damage in
 	 Dis={ManhattanDistance State.currentPosition Position}
 	 if Dis==0 then
@@ -259,14 +257,14 @@ in
 	    Damage=0
 	    Message=null
 	 end
-	 {System.show Message}
+	% {System.show Message}
 	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Damage}
       end
    end
 
    fun{SayPassingDrone Drone ?ID ?Answer State PlayerID}
       ID=PlayerID
-      case Drone of drone(row X) then %Je suis pas sur que le case of drone(row x) soit syntaxiquement correct. A tester.
+      case Drone of drone(row X) then
 	 if X==State.currentPosition.x then Answer=true
 	 else Answer=false
 	 end
@@ -279,22 +277,22 @@ in
    end
 
    fun{SayAnswerDrone Drone ID Answer State}
-      {System.show 'Drone has been sent at '#Drone#' and the answer is '#Answer#' Player identified is '#ID}
+      %{System.show 'Drone has been sent at '#Drone#' and the answer is '#Answer#' Player identified is '#ID}
       State
    end
 
    fun{SayDeath ID State}
-      {System.show 'Player of ID '#ID#' died. May he rest in peace'}
+      %{System.show 'Player of ID '#ID#' died. May he rest in peace'}
       State
    end
 
 
    fun{SayDamageTaken ID Damage LifeLeft State}
-      {System.show 'Player of ID '#ID#' has taken '#Damage#'damage He still has '#LifeLeft#' lives'}
+      %{System.show 'Player of ID '#ID#' has taken '#Damage#'damage He still has '#LifeLeft#' lives'}
       State
    end
 
-   %On renvoie notre position avec au hasard soit x soit y qui est correct. La position incorrecte est generee au hasard
+   %Position is sent with either X or Y randomly generated
    fun{SayPassingSonar ?ID ?Answer State PlayerID}
       ID=PlayerID
       if ({OS.rand}mod 2)+1 == 1 then
@@ -306,23 +304,20 @@ in
    end
 
    fun{SayAnswerSonar ID Answer State}
-      {System.show 'Player of ID'#ID#' has been identified by a sonar at position '#Answer}
+      %{System.show 'Player of ID'#ID#' has been identified by a sonar at position '#Answer}
       State
    end
 
-
-
    %----------------------------------------------
-   %-----Fonctions pour les actions:--------------
+   %-------------Actions:-------------------------
    %----------------------------------------------
-   %On bouge randomly. Si on sait pas bouger on surface
-   %retourne le nouveau state
+   %We move randomly. If we can't move we surface
    fun{Move ?ID ?Position ?Direction State PlayerID}
       ID=PlayerID
       local CardDirections Choose IsPossible in
 	 CardDirections= 'east'|'west'|'south'|'north'|nil
-      %IN: east ou west ou north ou south
-      %OUT: ans(bool:Bool position:Pos) Bool=true si on peu se deplacer dans cette direction, Pos vaut notre nouvelle position si on se deplace par la
+      %IN: <carddirection>
+      %OUT: ans(bool:Bool position:Pos) Bool=true if we can move Direction, Pos is the new position if we move in this direction
 	 fun{IsPossible Direction}
 	    local NewPos CurrentX CurrentY in
 	       CurrentX=State.currentPosition.x
@@ -376,7 +371,6 @@ in
 			true
 		     end
 		  end
-          %la fonction isPossible teste si on peut aller dans cette direction
 		  Possible={IsPossible X}
 		  if Possible.bool==true then
 		     Direction=X
@@ -392,8 +386,8 @@ in
       end
    end
 
-
-   %Si on peut charger on charge le missile en premier, sinon la mine, sinon le drone, sinon le sonar.
+%This player in its current implementation only ever charges missiles because he fires them as soon as he has them. If we decide to edit the code to fire smartly the ChargeItem function won't need to be changed
+%Regardless if we don't fire the missile as soon as possible we will charge firstly the missile, then the mine, then the drone and then the sonar
    fun{ChargeItem ?ID ?KindItem State PlayerID}
       local CanCharge in
    	 fun{CanCharge Item}
@@ -431,8 +425,8 @@ in
       end
    end
 
-
-   %On tire d'abord un missile, si on a pas ce sera une mine, un drone et puis un sonar et sinon rien. On tire a une position random
+%We fire the missile as soon as we get it to a random position. We can thus commit suicide.
+%With this strategy we never fire mines, drone or sonars but they are still coded in case we want to change that
    fun{FireItem ?ID ?KindFire State PlayerID}
       ID=PlayerID
       local CanFire in
@@ -440,23 +434,23 @@ in
 	    State.items.Item >0
 	 end
 	 if {CanFire 'missile' State} then
-	    KindFire=missile({PickRandom {PositionsInRange missile PositionsAva State}})%ducoup on peut se tirer sur soi meme
-      {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
+	    KindFire=missile({PickRandom {PositionsInRange missile PositionsAva State}})%We can shoot ourselves down
+    %  {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	    {ModifState State.pastPosition items(missile:State.items.missile-1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 elseif {CanFire 'mine' State} then
 	    local MinePosition in
 	       MinePosition={PickRandom {PositionsInRange mine PositionsAva State}}
-	       KindFire=mine(MinePosition) %Strategie pourrie mais en theorie on arrive pas la car on charge toujours le missile en premier et si c'est charge on le tire...
-         {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
+	       KindFire=mine(MinePosition)
+         %{System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	       {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine-1 sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface {List.append State.placedMines MinePosition|nil} State.life}
 	    end
 	 elseif {CanFire 'drone' State} then
-	    KindFire=drone(row {PickRandom PositionsAva}.y)% meme chose
-      {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
+	    KindFire=drone(row {PickRandom PositionsAva}.y)
+      %{System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone-1) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 elseif {CanFire 'sonar' State} then
 	    KindFire=sonar
-     {System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
+     %{System.show 'Player of ID:'#ID#' has fired '#KindFire#'!'}
 	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar-1 drone:State.items.drone) State.charges State.currentPosition State.surface State.placedMines State.life}
 	 else
 	    KindFire=null
@@ -465,8 +459,7 @@ in
       end
    end
 
-   %makes a previously placed mine explode
-   %Si on a une ou plusieur mines on en fait exploser une au hasard.
+   %We detonate a mine as soon as we placed it down. Not very smart but in this current implementation we only ever fire missiles so that's ok
    fun{FireMine ?ID ?Mine State PlayerID}
       ID=PlayerID
       case State.placedMines of _|_ then
@@ -480,17 +473,13 @@ in
    end
 
 
-
-
    fun{Dive State}
       {ModifState nil State.items State.charges State.currentPosition surface(surface:false time:0) State.placedMines State.life}
    end
 
 
-
-
    %----------------------------------------------------------------
-   %-------------Autres Fonctions------------------------------------------
+   %-------------Other Functions------------------------------------
    %-----------------------------------------------------------------
 
 
@@ -502,8 +491,6 @@ in
   fun{ManhattanDistance PtA PtB}
      {Number.abs PtA.x-PtB.x}+{Number.abs PtA.y-PtB.y}
   end
-
-
 
    %Returns a list of positions pt(x:X y:Y) where there is no island
    fun{AvailablePositions}
@@ -528,16 +515,18 @@ in
       {AvailablePositionsAAA {List.flatten Input.map} 1 1 nil}
    end
 
-   %prends un element au hasard dans une liste
+   %Picks a random element in a list
    fun{PickRandom Liste}
-      local Num Len in
-	 Len={List.length Liste}
-	 Num=({OS.rand} mod Len)+1
-	 {List.nth Liste Num}%Prends le Num element de la liste
+      if Liste==nil then nil
+      else
+	 local Num Len in
+	    Len={List.length Liste}
+	    Num=({OS.rand} mod Len)+1
+	    {List.nth Liste Num}
+	 end
       end
-   end
 
-   %returns a list of positions where the item can be fired
+   %returns a list of positions where KindItem can be fired (it's in our range)
    fun{PositionsInRange KindItem PositionsAva State}
       local MineBool MissBool in
 	 fun{MineBool Pos}%retoune true si la mine peut etre placee a la position pos
@@ -559,13 +548,13 @@ in
 	 end
 
 	 case KindItem of mine then
-	    {List.filter PositionsAva MineBool} %retourne la liste des elements qui satisfont la fonction {MineBool Element} parmis les positions sans iles.
+	    {List.filter PositionsAva MineBool}
 	 []missile then
 	    {List.filter PositionsAva MissBool}
 	 end
       end
    end
 
-   PositionsAva={AvailablePositions}%position ou il n'y a pas d'iles
+   PositionsAva={AvailablePositions}%positions without islands
 
 end
