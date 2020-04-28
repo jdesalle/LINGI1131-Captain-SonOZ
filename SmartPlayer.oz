@@ -515,9 +515,9 @@ in
       case State.placedMines of _|_ then
 	 local PositionsToChooseFrom FindMineDet in
 	    if State.ennemyStateList==nil then
-	       PositionsToChooseFrom={FindPlayerPosition PositionsAva {PickRandom State.ennemyStateList}.direction} %on choisi un joueur a tuer au hasard parmis ceux qu'on a enregistre
+	        PositionsToChooseFrom={FindPlayerPosition PositionsAva 'east'|'east'|nil}       
 	    else
-	       PositionsToChooseFrom={FindPlayerPosition PositionsAva 'east'|'east'|nil}
+	      PositionsToChooseFrom={FindPlayerPosition PositionsAva {PickRandom State.ennemyStateList}.direction} %on choisi un joueur a tuer au hasard parmis ceux qu'on a enregistre
 	    end
 	    FindMineDet={FindMineToDetonate State PositionsToChooseFrom 0} %on dit qu'on veut prendre 0 degats par nos tirs
 	    if FindMineDet.fire==true then

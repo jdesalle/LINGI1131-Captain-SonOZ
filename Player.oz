@@ -239,7 +239,7 @@ in
    end
 
    fun{SayMineExplode ID Position ?Message State PlayerID} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
-      {System.show 'player of ID'#ID#'has made a mine explode at position'#Position#'this player:'#PlayerID#'Is updating its life accordingly'}
+          {System.show 'player of ID'#ID#'has made a mine explode at position'#Position#'this player:'#PlayerID#' at position'#State.currentPosition#'Is updating its life accordingly. CurrentLife:'#State.life}
       local Dis Damage in
 	 Dis={ManhattanDistance State.currentPosition Position}
 	 if Dis==0 then
