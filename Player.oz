@@ -213,39 +213,54 @@ in
 
 
    fun{SayMissileExplode ID Position ?Message State PlayerID}
-   {System.show 'player of ID'#ID#'has made a missile explode at position'#Position#'this player:'#PlayerID#'Is updating its life accordingly'}
-      local Dis Dam  in
-	 Dis={ManhattanDistance State Position}
-	 if Dis==null then
-	    Message=sayDamageTaken(PlayerID 0 State.life)
-      Dam=0
-	 elseif State.life - Dis =<0 then
-	    Message=sayDeath(PlayerID)
-      Dam=Dis
+      {System.show 'player of ID'#ID#'has made a missile explode at position'#Position#'this player:'#PlayerID#' at position'#State.currentPosition#'Is updating its life accordingly. CurrentLife:'#State.life}
+      local Dis Damage in
+	 Dis={ManhattanDistance State.currentPosition Position}
+	 if Dis==0 then
+	    Damage=2
+	    if State.life-2>0 then
+	       Message=sayDamageTaken(ID 2 State.life-2)
+	    else Message=sayDeath(ID)
+	    end
+	 elseif Dis==1 then
+	    Damage=1
+	    if State.life-1>0 then
+	       Message=sayDamageTaken(ID 1 State.life-1)
+	    else
+	       Message=sayDeath(ID)
+	    end
 	 else
-	    Message=sayDamageTaken(PlayerID Dis State.life-Dis)
-      Dam=Dis
+	    Damage=0
+	    Message=null
 	 end
 	 {System.show Message}
-	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Dam}
+	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Damage}
       end
    end
 
    fun{SayMineExplode ID Position ?Message State PlayerID} %Exactement la meme fonction que sayMissile Explode. Moyen de le traiter dans le case of mais pas sur qui'il faille
-   {System.show 'player of ID'#ID#'has made a mine explode at position'#Position#'this player:'#PlayerID#'Is updating its life accordingly'}
-      local Dis Dam in
-	 Dis={ManhattanDistance State Position}
-	 if Dis==null then
-	    Message=sayDamageTaken(PlayerID 0 State.life)
-      Dam=0
-	 elseif State.life-Dis=<0 then
-	    Message=sayDeath(PlayerID)
-      Dam=Dis
-	 else Message=sayDamageTaken(PlayerID Dis State.life-Dis)
-   Dam=Dis
+      {System.show 'player of ID'#ID#'has made a mine explode at position'#Position#'this player:'#PlayerID#'Is updating its life accordingly'}
+      local Dis Damage in
+	 Dis={ManhattanDistance State.currentPosition Position}
+	 if Dis==0 then
+	    Damage=2
+	    if State.life-2>0 then
+	       Message=sayDamageTaken(ID 2 State.life-2)
+	    else Message=sayDeath(ID)
+	    end
+	 elseif Dis==1 then
+	    Damage=1
+	    if State.life-1>0 then
+	       Message=sayDamageTaken(ID 1 State.life-1)
+	    else
+	       Message=sayDeath(ID)
+	    end
+	 else
+	    Damage=0
+	    Message=null
 	 end
 	 {System.show Message}
-	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Dam}
+	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life-Damage}
       end
    end
 
@@ -380,33 +395,42 @@ in
 
    %Si on peut charger on charge le missile en premier, sinon la mine, sinon le drone, sinon le sonar.
    fun{ChargeItem ?ID ?KindItem State PlayerID}
-      ID=PlayerID
-      if State.charges.missile+1<Input.missile then
-	 KindItem=missile
-	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile+1 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
-      elseif State.charges.missile+1==Input.missile then
-	 KindItem=missile
-	 {ModifState State.pastPosition items(missile:State.items.missile+1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) charges(missile:0 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
-      elseif State.charges.mine+1 < Input.mine then
-	 KindItem=mine
-	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mines+1 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
-      elseif State.charges.mine+1 == Input.mine then
-	 KindItem=mine
-	 {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine+1 sonar:State.items.sonar drone:State.items.drone) charges(missile:State.charges.missile mine:0 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
-      elseif State.charges.drone+1 <Input.drone then
-	 KindItem=drone
-	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone+1) State.currentPosition State.surface State.placedMines State.life}
-      elseif State.charges.drone+1 == Input.drone then
-	 KindItem=drone
-	 {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone+1) charges(missile:State.charges.missile mine:State.charges.mines sonar:State.charges.sonar drone:0) State.currentPosition State.surface State.placedMines State.life}
-      elseif State.charges.sonar+1 < Input.sonar then
-	 KindItem=sonar
-	 {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mines sonar:State.charges.sonar+1 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
-      else
-	 KindItem=sonar
-	 {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar+1 drone:State.items.drone) charges(missile:State.charges.missile mine:State.charges.mine sonar:0 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
+      local CanCharge in
+   	 fun{CanCharge Item}
+   	    State.items.Item <1
+   	 end
+   	 ID=PlayerID
+   	 if State.charges.missile+1<Input.missile andthen {CanCharge 'missile'} then
+   	    KindItem=missile
+   	    {ModifState State.pastPosition State.items charges(missile:State.charges.missile+1 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
+   	 elseif State.charges.missile+1==Input.missile andthen {CanCharge 'missile'} then
+   	    KindItem=missile
+   	    {ModifState State.pastPosition items(missile:State.items.missile+1 mine:State.items.mine sonar:State.items.sonar drone:State.items.drone) charges(missile:0 mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
+   	 elseif State.charges.mine+1 < Input.mine andthen {CanCharge 'mine'} then
+   	    KindItem=mine
+   	    {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mine+1 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
+   	 elseif State.charges.mine+1 == Input.mine andthen {CanCharge 'mine'} then
+   	    KindItem=mine
+   	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine+1 sonar:State.items.sonar drone:State.items.drone) charges(missile:State.charges.missile mine:0 sonar:State.charges.sonar drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
+   	 elseif State.charges.drone+1 <Input.drone andthen {CanCharge 'drone'} then
+   	    KindItem=drone
+   	    {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mine sonar:State.charges.sonar drone:State.charges.drone+1) State.currentPosition State.surface State.placedMines State.life}
+   	 elseif State.charges.drone+1 == Input.drone andthen {CanCharge 'drone'} then
+   	    KindItem=drone
+   	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone+1) charges(missile:State.charges.missile mine:State.charges.mine sonar:State.charges.sonar drone:0) State.currentPosition State.surface State.placedMines State.life}
+   	 elseif State.charges.sonar+1 < Input.sonar andthen {CanCharge 'sonar'} then
+   	    KindItem=sonar
+   	    {ModifState State.pastPosition State.items charges(missile:State.charges.missile mine:State.charges.mine sonar:State.charges.sonar+1 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
+   	 elseif  State.charges.sonar+1 == Input.sonar andthen {CanCharge 'sonar'} then
+   	    KindItem=sonar
+   	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar+1 drone:State.items.drone) charges(missile:State.charges.missile mine:State.charges.mine sonar:0 drone:State.charges.drone) State.currentPosition State.surface State.placedMines State.life}
+   	 else
+   	    KindItem=null
+   	    State
+   	 end
       end
    end
+
 
    %On tire d'abord un missile, si on a pas ce sera une mine, un drone et puis un sonar et sinon rien. On tire a une position random
    fun{FireItem ?ID ?KindFire State PlayerID}
@@ -474,22 +498,10 @@ in
       state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life)
    end
 
-   %return damage taken by the submarine at the current the position from the explosion at located at Position.
-   %Damage is calculated proportionnally to the manhattanDistance
-   fun{ManhattanDistance State Position}
-      local Xsub Ysub Xex Yex Distance in
-	 Xsub=State.currentPosition.x
-	 Ysub=State.currentPosition.y
-	 Xex=Position.x
-	 Yex=Position.y
-	 Distance={Number.abs Xsub-Xex}+{Number.abs Ysub-Yex}
-	 if Distance >=2 then null
-	 elseif Distance==1 then 1
-	 else
-	    2
-	 end
-      end
-   end
+   %Returns manhattan distance between ptA and ptB
+  fun{ManhattanDistance PtA PtB}
+     {Number.abs PtA.x-PtB.x}+{Number.abs PtA.y-PtB.y}
+  end
 
 
 
@@ -527,13 +539,9 @@ in
 
    %returns a list of positions where the item can be fired
    fun{PositionsInRange KindItem PositionsAva State}
-      local Distance MineBool MissBool in
-	 fun{Distance Position}% donne la manhattan distance entre la position actuelle et Position
-	    {Number.abs State.currentPosition.x-Position.x}+{Number.abs State.currentPosition.y-Position.y}
-	 end
-
+      local MineBool MissBool in
 	 fun{MineBool Pos}%retoune true si la mine peut etre placee a la position pos
-	    local Dist={Distance Pos} in
+	    local Dist={ManhattanDistance State.currentPosition Pos} in
 	       if Dist>=Input.minDistanceMine andthen Dist =<Input.maxDistanceMine then true
 	       else
 		  false
@@ -542,7 +550,7 @@ in
 	 end
 
 	 fun{MissBool Pos}
-	    local Dist={Distance Pos} in
+	    local Dist={ManhattanDistance State.currentPosition Pos} in
 	       if Dist>=Input.minDistanceMissile andthen Dist =<Input.maxDistanceMissile then true
 	       else
 		  false
