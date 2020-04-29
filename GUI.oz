@@ -39,6 +39,8 @@ define
 
    Path={OS.getCWD}
    SubmarineIm={QTk.newImage photo(url:Path#"/submarine.gif")}
+   PalmierIm={QTk.newImage photo(url:Path#"/palmier.gif")}
+   MineIm={QTk.newImage photo(url:Path#"/mine.gif")}
 in
 
 %%%%% Build the initial window and set it up (call only once)
@@ -76,8 +78,9 @@ in
    end
 
 %%%%% Squares of water and island
-   Squares = square(0:label(text:"" width:1 height:1 bg:c(102 102 255))
-		    1:label(text:"" borderwidth:5 relief:raised width:1 height:1 bg:c(153 76 0))
+   Squares = square(0:label(text:"" width:1 height:1 bg:c(102 102 255)) 
+		    %1:label(text:"" borderwidth:5 relief:raised width:1 height:1 bg:c(153 76 0))
+		     1:label(text:"" width:1 height:1 bg:c(0 0 0) image:PalmierIm)
 		   )
 
 %%%%% Labels for rows and columns
@@ -145,7 +148,7 @@ in
       in
 	 guiPlayer(id:ID score:HandleScore submarine:Handle mines:Mine path:Path) = State
 	 pt(x:X y:Y) = Position
-	 LabelMine = label(text:"M" handle:HandleMine borderwidth:5 relief:raised bg:ID.color ipadx:5 ipady:5)
+	 LabelMine = label(text:"M" handle:HandleMine borderwidth:5 relief:raised bg:ID.color ipadx:5 ipady:5 image:MineIm)
 	 {Grid.grid configure(LabelMine row:X+1 column:Y+1)}
 	 {HandleMine 'raise'()}
 	 {Handle 'raise'()}
