@@ -3,6 +3,8 @@ import
    QTk at 'x-oz://system/wp/QTk.ozf'
    Input
    System
+
+   OS
 export
    portWindow:StartWindow
 define
@@ -34,6 +36,9 @@ define
    StateModification
 
    UpdateLife
+
+   Path={OS.getCWD}
+   LapinIm={QTk.newImage photo(url:Path#"/lapin.gif")}
 in
 
 %%%%% Build the initial window and set it up (call only once)
@@ -109,7 +114,7 @@ in
       pt(x:X y:Y) = Position
       id(id:Id color:Color name:_) = ID
 
-      LabelSub = label(text:"S" handle:Handle borderwidth:5 relief:raised bg:Color ipadx:5 ipady:5)
+      LabelSub = label(text:"S" handle:Handle borderwidth:5 relief:raised bg:Color ipadx:5 ipady:5 image:LapinIm)
       LabelScore = label(text:Input.maxDamage borderwidth:5 handle:HandleScore relief:solid bg:Color ipadx:5 ipady:5)
       HandlePath = {DrawPath Grid Color X Y}
       {Grid.grid configure(LabelSub row:X+1 column:Y+1 sticky:wesn)}
