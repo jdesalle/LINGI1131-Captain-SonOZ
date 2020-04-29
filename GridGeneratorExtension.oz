@@ -1,7 +1,8 @@
 declare
+%This function can be used to generate a grid. In extremely rare cases it is possible that the generated map will be cut in two by island or that island will form a closed shape. Simply restart the function to fix this if it happens.
 fun{CreateMatrix Nrow Ncol}
    local CreateMatrixAAA CreateRow in
-      fun{CreateRow}% cree une liste de 0 et de 1 aleatoire
+      fun{CreateRow}% creates list of 1 and 0 randomly
 	 local CreateRowAAA GenerateNum in
 	    fun{CreateRowAAA Acc}
 	       if{List.length Acc}<Ncol then
@@ -13,10 +14,10 @@ fun{CreateMatrix Nrow Ncol}
 		  Acc
 	       end
 	    end
-	    fun{GenerateNum} %genere soit un 1 soit un 0, mais plus souvent des 0
+	    fun{GenerateNum}%generates either a 1 or a 0 but more frequently 0
 	       local Z in
 		  Z={OS.rand} mod 2
-		  if Z==1 then % on le fait une deuxième fois pour pas avoir trop de 1, si il y en a toujours trop il suffit de le faire une troisième fois
+		  if Z==1 then %If we feel we still have too many ones simply do an OS random a third time
 		     {OS.rand} mod 2
 		  else
 		     Z
@@ -36,7 +37,7 @@ fun{CreateMatrix Nrow Ncol}
 	    end
 	 end	 
       end
-      {CreateMatrixAAA [0] Nrow}.2 %pour plus avoir le 0
+      {CreateMatrixAAA [0] Nrow}.2 
    end
 end
 {Browse {CreateMatrix 4 4}}
