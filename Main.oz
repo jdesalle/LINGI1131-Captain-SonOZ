@@ -85,12 +85,12 @@ in
    fun{Alive StateList Deads}
       local
 	 fun{CheckDead ID Deads}
-	    case Deads of nil then false
-	    []H|T then
+	    case Deads of H|T then
 	       if ID==H then true
 	       else
 		  {CheckDead ID T}
 	       end
+	    []nil then false
 	    end
 	 end
       in
@@ -104,7 +104,7 @@ in
 	 end
       end
    end
-    
+   
  %------------Broadcats functions-----------------
    proc{Broadcast Message StateList}
       case StateList of nil then skip
@@ -217,14 +217,18 @@ in
 	    Position Direction ID
 	 in
 	  {Send Port move(ID Position Direction)}
-	  {Send WindowPort movePlayer(ID Position)}
-	  if Direction == 'surface' then
-	     {Send WindowPort surface(ID)}
-	     {Broadcast saySurface(ID) StateList}
-	     false	     
+	  if ID \=null then
+	     {Send WindowPort movePlayer(ID Position)}
+	     if Direction == 'surface' then
+		{Send WindowPort surface(ID)}
+		{Broadcast saySurface(ID) StateList}
+		false	     
+	     else
+		{Broadcast sayMove(ID Direction) StateList}
+		true	    
+	     end
 	  else
-	     {Broadcast sayMove(ID Direction) StateList}
-	     true	    
+	     false
 	  end
        end
    end
@@ -243,8 +247,12 @@ in
 	  KindFire  ID
        in
 	  {Send Port fireItem(ID KindFire)}
-	  if KindFire \= null then
-	     {Alive StateList {BroadcastFire ID KindFire Port StateList}}
+	  if ID \=null then
+	     if KindFire \= null then
+		{Alive StateList {BroadcastFire ID KindFire Port StateList}}
+	     else
+		StateList
+	     end
 	  else
 	     StateList
 	  end
@@ -255,8 +263,12 @@ in
 	 Mine ID
       in
 	 {Send Port fireMine(ID Mine)}
-	 if Mine \=null then
-	    {BroadcastMine ID Mine Dead1}
+	 if ID\=null then
+	    if Mine \=null then
+	       {BroadcastMine ID Mine Dead1}
+	    else
+	       nil
+	    end
 	 else
 	    nil
 	 end
@@ -310,6 +322,7 @@ in
 		  else
 		     Surf={Alive StateList Result.deads}
 		  end
+		  {System.show 'TEST'}
 		  {GetTurn {Alive T Result.deads} Surf}
 	       end
 	    end
