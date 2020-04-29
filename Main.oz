@@ -155,11 +155,6 @@ in
 	    Answer
 	 in
 	    case StateList of nil then nil
-	    []H|nil then
-	       {Send H.port sayPassingDrone(drone H.id Answer)}
-	       {Send {GetPort ID StateList} sayAnswerDrone(drone H.id Answer)}
-	       {Send WindowPort drone(ID drone)}
-	       nil
 	    []H|T then
 	       {Send H.port sayPassingDrone(drone H.id Answer)}
 	       {Send {GetPort ID StateList} sayAnswerDrone(drone H.id Answer)}
@@ -188,22 +183,23 @@ in
 	    Message
 	    in
 	    {Send H.port sayMineExplode(ID Mine Message)}
-	    case Message of nulll then {BroadcastMine ID Mine T}
+	    {Send WindowPort explosion(ID Mine)}
+	    {Send WindowPort removeMine(ID Mine)}
+	    case Message of null then {BroadcastMine ID Mine T}
 	    []sayDeath(Dead)then
-	       %{Send WindowPort lifeUpdate(ID 0)}
-	       %{Send WindowPort removePlayer(ID)}
+	       {Send WindowPort lifeUpdate(ID 0)}
+	       {Send WindowPort removePlayer(ID)}
 	       {Broadcast Message StateList}
 	       Dead|{BroadcastMine ID Mine T}
 	    []sayDamageTaken(ID Damage LifeLeft) then
-	      % {Send WindowPort lifeUpdate(ID LifeLeft)}
+	       {Send WindowPort lifeUpdate(ID LifeLeft)}
 	       {Broadcast Message StateList}
 	       {BroadcastMine ID Mine T}
 	    end
-	    %{Send WindowPort removeMine(ID Mine)}
 	 end
       end
    end
-
+   
    %------------Stream Process Functions-----------------
    fun{ProcessStream Stream StateList}
       case Stream of nil then StateList
@@ -279,13 +275,13 @@ in
    end
    fun{Turn State StateList S}%%%TODO add thinking if S is true
       if State.surface.timeLeft>0 then
-	 result(surface:true deads:nil)
+	 result(surface:true deads:nil id:State.id)
       else
 	 if State.surface.surface==true then
 	    {Send State.port dive}
 	 end	
 	 if{Move State.port StateList } ==false then
-	    result(surface:true deads:nil)
+	    result(surface:true deads:nil id: State.id)
 	    else
 	    {Charge State.port StateList}
 	    local Dead1 Dead in
