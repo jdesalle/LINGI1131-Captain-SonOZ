@@ -13,8 +13,7 @@ define
    SetState%%%%to set the state
    UpdateSurf
    Alive
-   NewPos
-   ChangePos
+   GetPort
    ProcessStream
    GetFinalState
    %BroadCast's
@@ -69,7 +68,16 @@ in
    fun{SetState ID Port Surface}
       state(id:ID port:Port surface:Surface)
    end
-
+   fun {GetPort ID StateList}
+      case StateList of nil then null
+      []H|T then
+	 if H.id==ID then
+	    H.port
+	 else
+	    {GetPort ID T}
+	 end
+      end
+   end
    fun{UpdateSurf ID StateList}
       case StateList of nil then nil
       []H|T then
@@ -125,7 +133,7 @@ in
 	       Message
 	    in
 	       {Send H.port sayMissileExplode(ID Position Message)}
-	       case Message of nil then {BroadcastFire ID KindFire T}
+	       case Message of null then {BroadcastFire ID KindFire T}
 	       []sayDeath(ID)then
 		  {Broadcast Message StateList}
 		  {Send WindowPort lifeUpdate(ID 0)}
@@ -149,12 +157,12 @@ in
 	    case StateList of nil then nil
 	    []H|nil then
 	       {Send H.port sayPassingDrone(drone H.id Answer)}
-	       {Send ID sayAnswerDrone(drone H.id Answer)}
+	       {Send {GetPort ID StateList} sayAnswerDrone(drone H.id Answer)}
 	       {Send WindowPort drone(ID drone)}
 	       nil
 	    []H|T then
 	       {Send H.port sayPassingDrone(drone H.id Answer)}
-	       {Send ID sayAnswerDrone(drone H.id Answer)}
+	       {Send {GetPort ID StateList} sayAnswerDrone(drone H.id Answer)}
 	       {BroadcastFire ID KindFire T}
 	    end
 	 end
@@ -165,7 +173,7 @@ in
 	    case StateList of nil then nil
 	    []H|T then
 	       {Send H.port sayPassingSonar(sonar H.id Answer)}
-	       {Send ID sayAnswerSonar(sonar H.id Answer)}
+	       {Send {GetPort ID StateList} sayAnswerSonar(sonar H.id  Answer)}
 	       {BroadcastFire ID KindFire T}
 	    end
 	 end
@@ -180,7 +188,7 @@ in
 	    Message
 	    in
 	    {Send H.port sayMineExplode(ID Mine Message)}
-	    case Message of nil then {BroadcastMine ID Mine T}
+	    case Message of nulll then {BroadcastMine ID Mine T}
 	    []sayDeath(Dead)then
 	       %{Send WindowPort lifeUpdate(ID 0)}
 	       %{Send WindowPort removePlayer(ID)}
@@ -226,6 +234,7 @@ in
 	  {Send Port move(ID Position Direction)}
 	  {Send WindowPort movePlayer(ID Position)}
 	  if Direction == 'surface' then
+	     {Send WindowPort surface(ID)}
 	     {Broadcast saySurface(ID) StateList}
 	     false	     
 	  else
@@ -296,6 +305,7 @@ in
 	    []H|T then
 	       local Result Surf in
 		  Result= {Turn H StateList false}
+		  {Delay Input.guiDelay}
 		  if Result.surface==true then
 		     Surf={Alive {UpdateSurf H.id StateList} Result.deads}
 		  else
