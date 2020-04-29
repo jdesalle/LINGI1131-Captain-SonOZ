@@ -15,14 +15,19 @@ fun{CreateMatrix Nrow Ncol}
 	       end
 	    end
 	    fun{GenerateNum}%generates either a 1 or a 0 but more frequently 0
-	       local Z in
+	       local Z ZZ in
 		  Z={OS.rand} mod 2
 		  if Z==1 then %If we feel we still have too many ones simply do an OS random a third time
-		     {OS.rand} mod 2
+		     ZZ={OS.rand} mod 2
+		     if ZZ==1 then
+			{OS.rand} mod 2
+		     else
+			ZZ
+		     end    
 		  else
 		     Z
 		  end
-	       end
+	       end  
 	    end	       
 	    {CreateRowAAA nil}
 	 end
@@ -40,4 +45,4 @@ fun{CreateMatrix Nrow Ncol}
       {CreateMatrixAAA [0] Nrow}.2 
    end
 end
-{Browse {CreateMatrix 4 4}}
+{Browse {CreateMatrix 35 35}}

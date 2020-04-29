@@ -1,4 +1,6 @@
 functor
+import
+   OS
 export
    isTurnByTurn:IsTurnByTurn
    nRow:NRow
@@ -41,6 +43,7 @@ define
    MinDistanceMissile
    MaxDistanceMissile
    GUIDelay
+   CreateMatrix
 in
 
 %%%% Style of game %%%%
@@ -49,19 +52,66 @@ in
 
 %%%% Description of the map %%%%
 
-   NRow = 10
-   NColumn = 10
+  fun{CreateMatrix Nrow Ncol}
+   local CreateMatrixAAA CreateRow in
+      fun{CreateRow}% creates list of 1 and 0 randomly
+	 local CreateRowAAA GenerateNum in
+	    fun{CreateRowAAA Acc}
+	       if{List.length Acc}<Ncol then
+		  local Y  in
+		     Y={GenerateNum}
+		     {CreateRowAAA {List.append Acc Y|nil}}
+		  end    
+	       else
+		  Acc
+	       end
+	    end
+	    fun{GenerateNum}%generates either a 1 or a 0 but more frequently 0
+	       local Z ZZ in
+		  Z={OS.rand} mod 2
+		  if Z==1 then %If we feel we still have too many ones simply do an OS random a third time
+		     ZZ={OS.rand} mod 2
+		     if ZZ==1 then
+			{OS.rand} mod 2
+		     else
+			ZZ
+		     end    
+		  else
+		     Z
+		  end
+	       end  
+	    end	       
+	    {CreateRowAAA nil}
+	 end
+      end    
+      fun{CreateMatrixAAA Acc Rows}
+	 local X in
+	    if Rows>0 then
+	       X={CreateRow}
+	       {CreateMatrixAAA {List.append Acc X|nil} Rows-1}
+	    else
+	       Acc
+	    end
+	 end	 
+      end
+      {CreateMatrixAAA [0] Nrow}.2 
+   end
+end
+   NRow = 15
+   NColumn = 15
 
-   Map = [[0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 1 1 0 0 0 0 0]
-	  [0 0 1 1 0 0 1 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 1 0 0 1 1 0 0]
-	  [0 0 1 1 0 0 1 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]
-	  [0 0 0 0 0 0 0 0 0 0]]
+   Map={CreateMatrix NRow NColumn}
+ %  Map = [[0 0 0 0 0 0 0 0 0 0]
+	  % [0 0 0 0 0 0 0 0 0 0]
+	  % [0 0 0 1 1 0 0 0 0 0]
+	  % [0 0 1 1 0 0 1 0 0 0]
+	  % [0 0 0 0 0 0 0 0 0 0]
+	  % [0 0 0 0 0 0 0 0 0 0]
+	  % [0 0 0 1 0 0 1 1 0 0]
+	  % [0 0 1 1 0 0 1 0 0 0]
+	  % [0 0 0 0 0 0 0 0 0 0]
+	  % [0
+   %0 0 0 0 0 0 0 0 0]]
 
 %%%% Players description %%%%
 

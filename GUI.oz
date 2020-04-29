@@ -37,10 +37,13 @@ define
 
    UpdateLife
 
+   PickRandom
    Path={OS.getCWD}
    SubmarineIm={QTk.newImage photo(url:Path#"/submarine.gif")}
    PalmierIm={QTk.newImage photo(url:Path#"/palmier.gif")}
    MineIm={QTk.newImage photo(url:Path#"/mine.gif")}
+   RocksIm={QTk.newImage photo(url:Path#"/rocks.gif")}
+   VolcanIm={QTk.newImage photo(url:Path#"/volcan.gif")}
 in
 
 %%%%% Build the initial window and set it up (call only once)
@@ -51,7 +54,7 @@ in
       Desc=grid(handle:Grid height:500 width:500)
       DescScore=grid(handle:GridScore height:100 width:500)
       Window={QTk.build td(Toolbar Desc DescScore)}
-  
+
       {Window show}
 
 		% configure rows and set headers
@@ -78,11 +81,26 @@ in
    end
 
 %%%%% Squares of water and island
-   Squares = square(0:label(text:"" width:1 height:1 bg:c(102 102 255)) 
-		    %1:label(text:"" borderwidth:5 relief:raised width:1 height:1 bg:c(153 76 0))
-		     1:label(text:"" width:1 height:1 bg:c(0 0 0) image:PalmierIm)
-		   )
+   Squares = square(0:label(text:"" width:1 height:1 bg:c(102 102 255))
+		    %1:label(text:"" borderwidth:5 relief:raised width:1 height:1 bg:c(153 76 0))%original
+		    1:label(text:"" width:1 height:1 bg:c(102 102 255) image:PalmierIm)) | square(0:label(text:"" width:1 height:1 bg:c(102 102 255))
+		    1:label(text:"" width:1 height:1 bg:c(102 102 255) image:RocksIm))|square(0:label(text:"" width:1 height:1 bg:c(102 102 255))
+		    1:label(text:"" width:1 height:1 bg:c(102 102 255) image:VolcanIm))|nil
 
+
+ %Picks a random position in a list
+   fun{PickRandom Liste}
+      if Liste==nil then nil
+      else
+	 local Num Len in
+	    Len={List.length Liste}
+	    Num=({OS.rand} mod Len)+1
+	    {List.nth Liste Num}
+	 end
+      end
+   end
+
+   
 %%%%% Labels for rows and columns
    fun{Label V}
       label(text:V borderwidth:5 relief:raised bg:c(255 51 51) ipadx:5 ipady:5)
@@ -94,7 +112,7 @@ in
 	 case Column
 	 of nil then skip
 	 [] T|End then
-	    {Grid configure(Squares.T row:M+1 column:N+1 sticky:wesn)}
+	    {Grid configure({PickRandom Squares}.T row:M+1 column:N+1 sticky:wesn)}
 	    {DrawColumn End M N+1}
 	 end
       end
@@ -141,7 +159,7 @@ in
 	 guiPlayer(id:ID score:HandleScore submarine:Handle mines:Mine path:NewPath|Path)
       end
    end
-  
+
    fun{DrawMine Position}
       fun{$ Grid State}
 	 ID HandleScore Handle Mine Path LabelMine HandleMine X Y
@@ -180,7 +198,7 @@ in
 	 end
       end
    end
-	
+
    fun{DrawPath Grid Color X Y}
       Handle LabelPath
    in
@@ -188,12 +206,12 @@ in
       {Grid.grid configure(LabelPath row:X+1 column:Y+1)}
       Handle
    end
-	
+
    proc{RemoveItem Grid Handle}
       {Grid.grid forget(Handle)}
    end
 
-		
+
    fun{RemovePath Grid State}
       ID HandleScore Handle Mine Path
    in
@@ -231,7 +249,7 @@ in
       case State
       of nil then nil
       [] guiPlayer(id:ID score:HandleScore submarine:Handle mines:M path:P)|Next then
-			
+
 	 if (ID == WantedID) then
 	    {HandleScore set(0)}
 	    for H in P do
@@ -252,7 +270,7 @@ in
 
 
 
-   
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    fun{StartWindow}
@@ -269,7 +287,7 @@ in
    proc{TreatStream Stream Grid State}
       case Stream
       of nil then skip
-      [] buildWindow|T then NewGrid in 
+      [] buildWindow|T then NewGrid in
 	 NewGrid = {BuildWindow}
 	 {System.show 'Building Window'}
 	 {TreatStream T NewGrid State}
