@@ -464,7 +464,7 @@ in
       ID=PlayerID
       case State.placedMines of _|_ then
 	 Mine={PickRandom State.placedMines}
-    {System.show 'Player of ID:'#ID#' has detonated a mine at position '#Mine#'!'}
+   % {System.show 'Player of ID:'#ID#' has detonated a mine at position '#Mine#'!'}
 	 {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface {List.subtract State.placedMines Mine} State.life}
       []nil then
 	 Mine=null
@@ -525,6 +525,8 @@ in
 	    {List.nth Liste Num}
 	 end
       end
+   end
+   
 
    %returns a list of positions where KindItem can be fired (it's in our range)
    fun{PositionsInRange KindItem PositionsAva State}
