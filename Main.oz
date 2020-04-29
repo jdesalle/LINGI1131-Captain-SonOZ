@@ -10,7 +10,7 @@ define
    InitPosition
 %%%StateFunction
    StateList
-   SetState%%%%to set the state
+   SetState
    UpdateSurf
    Alive
    ProcessStream
