@@ -163,7 +163,7 @@ in
    in
       {NewPort Stream Port}
       thread
-	 PlayerID=id(id:ID color:Color name:'playerstupid')
+	 PlayerID=id(id:ID color:Color name:'Player004Random')
 	 {TreatStream Stream nil PlayerID}
       end
       Port

@@ -161,7 +161,7 @@ in
       {NewPort Stream Port}
       thread
 	 local PlayerID in
-	    PlayerID=id(id:ID color:Color name:'smartPlayer')
+	    PlayerID=id(id:ID color:Color name:'Player004Smart')
 	    {TreatStream Stream nil PlayerID}
 	 end
 
