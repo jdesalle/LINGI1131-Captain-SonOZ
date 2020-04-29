@@ -22,6 +22,7 @@ define
    %%Parties and related functions
    PartieTT
    PartieSS
+   
    SimulateThinking
    Turn
    Move
@@ -85,12 +86,16 @@ in
    fun{Alive StateList Deads}
       local
 	 fun{CheckDead ID Deads}
-	    case Deads of H|T then
-	       if ID==H then true
-	       else
-		  {CheckDead ID T}
+	    if ID==null then
+	       true
+	    else
+	       case Deads of H|T then
+		  if ID.id==H.id then true
+		  else
+		     {CheckDead ID T}
+		  end
+	       []nil then false
 	       end
-	    []nil then false
 	    end
 	 end
       in
@@ -123,13 +128,13 @@ in
 	    in
 	       {Send H.port sayMissileExplode(ID Position Message)}
 	       case Message of null then {BroadcastFire ID KindFire Port T}
-	       []sayDeath(ID)then
+	       []sayDeath(ID2)then
 		  {Broadcast Message StateList}
-		  {Send WindowPort lifeUpdate(ID 0)}
-		  {Send WindowPort removePlayer(ID)}
-		  ID|{BroadcastFire ID KindFire Port T}
-	       []sayDamageTaken(ID Damage LifeLeft) then
-		  {Send WindowPort lifeUpdate(ID LifeLeft)}
+		  {Send WindowPort lifeUpdate(ID2 0)}
+		  {Send WindowPort removePlayer(ID2)}
+		  ID2|{BroadcastFire ID KindFire Port T}
+	       []sayDamageTaken(ID2 Damage LifeLeft) then
+		  {Send WindowPort lifeUpdate(ID2 LifeLeft)}
 		  {Broadcast Message StateList}
 		  {BroadcastFire ID KindFire Port T}
 	       end
@@ -175,13 +180,13 @@ in
 	    {Send WindowPort explosion(ID Mine)}
 	    {Send WindowPort removeMine(ID Mine)}
 	    case Message of null then {BroadcastMine ID Mine T}
-	    []sayDeath(Dead)then
-	       {Send WindowPort lifeUpdate(ID 0)}
-	       {Send WindowPort removePlayer(ID)}
+	    []sayDeath(ID2)then
+	       {Send WindowPort lifeUpdate(ID2 0)}
+	       {Send WindowPort removePlayer(ID2)}
 	       {Broadcast Message StateList}
-	       Dead|{BroadcastMine ID Mine T}
-	    []sayDamageTaken(ID Damage LifeLeft) then
-	       {Send WindowPort lifeUpdate(ID LifeLeft)}
+	       ID2|{BroadcastMine ID Mine T}
+	    []sayDamageTaken(ID2 Damage LifeLeft) then
+	       {Send WindowPort lifeUpdate(ID2 LifeLeft)}
 	       {Broadcast Message StateList}
 	       {BroadcastMine ID Mine T}
 	    end
@@ -322,7 +327,6 @@ in
 		  else
 		     Surf={Alive StateList Result.deads}
 		  end
-		  {System.show 'TEST'}
 		  {GetTurn {Alive T Result.deads} Surf}
 	       end
 	    end

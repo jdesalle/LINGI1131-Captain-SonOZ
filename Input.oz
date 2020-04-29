@@ -97,27 +97,26 @@ in
       {CreateMatrixAAA [0] Nrow}.2 
    end
 end
-   NRow = 15
-   NColumn = 15
+   NRow = 10
+   NColumn = 10
 
-   Map={CreateMatrix NRow NColumn}
- %  Map = [[0 0 0 0 0 0 0 0 0 0]
-	  % [0 0 0 0 0 0 0 0 0 0]
-	  % [0 0 0 1 1 0 0 0 0 0]
-	  % [0 0 1 1 0 0 1 0 0 0]
-	  % [0 0 0 0 0 0 0 0 0 0]
-	  % [0 0 0 0 0 0 0 0 0 0]
-	  % [0 0 0 1 0 0 1 1 0 0]
-	  % [0 0 1 1 0 0 1 0 0 0]
-	  % [0 0 0 0 0 0 0 0 0 0]
-	  % [0
-   %0 0 0 0 0 0 0 0 0]]
+  
+   Map = [[0 0 0 0 0 0 0 0 0 0]
+	   [0 0 0 0 0 0 0 0 0 0]
+	   [0 0 0 1 1 0 0 0 0 0]
+	   [0 0 1 1 0 0 1 0 0 0]
+	   [0 0 0 0 0 0 0 0 0 0]
+	   [0 0 0 0 0 0 0 0 0 0]
+	   [0 0 0 1 0 0 1 1 0 0]
+	   [0 0 1 1 0 0 1 0 0 0]
+	   [0 0 0 0 0 0 0 0 0 0]
+	   [0 0 0 0 0 0 0 0 0 0]]
 
 %%%% Players description %%%%
 
-   NbPlayer = 4
-   Players = [playerBasicAI playerBasicAI player004Random player004Smart]
-   Colors = [red green yellow blue]
+   NbPlayer = 3
+   Players = [player004Smart player004Smart playerBasicAI]
+   Colors = [red green yellow]
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
