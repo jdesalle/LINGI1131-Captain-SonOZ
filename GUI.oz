@@ -38,7 +38,7 @@ define
    UpdateLife
 
    Path={OS.getCWD}
-   LapinIm={QTk.newImage photo(url:Path#"/lapin.gif")}
+   SubmarineIm={QTk.newImage photo(url:Path#"/submarine.gif")}
 in
 
 %%%%% Build the initial window and set it up (call only once)
@@ -114,7 +114,7 @@ in
       pt(x:X y:Y) = Position
       id(id:Id color:Color name:_) = ID
 
-      LabelSub = label(text:"S" handle:Handle borderwidth:5 relief:raised bg:Color ipadx:5 ipady:5 image:LapinIm)
+      LabelSub = label(text:"S" handle:Handle borderwidth:5 relief:raised bg:Color ipadx:5 ipady:5 image:SubmarineIm)
       LabelScore = label(text:Input.maxDamage borderwidth:5 handle:HandleScore relief:solid bg:Color ipadx:5 ipady:5)
       HandlePath = {DrawPath Grid Color X Y}
       {Grid.grid configure(LabelSub row:X+1 column:Y+1 sticky:wesn)}
