@@ -496,7 +496,7 @@ in
 	       {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine-1 sonar:State.items.sonar drone:State.items.drone) State.charges State.currentPosition State.surface {List.append State.placedMines MinePosition|nil} State.life State.ennemyStateList}
 	    end
 	 elseif {CanFire 'drone' State} then %we try to fire a drone if all the above fail
-	    KindFire=drone(Col {PickRandom PositionsAva}.y)% We fire a drone on a random column, never a row
+	    KindFire=drone(column {PickRandom PositionsAva}.y)% We fire a drone on a random column, never a row
 	    {ModifState State.pastPosition items(missile:State.items.missile mine:State.items.mine sonar:State.items.sonar drone:State.items.drone-1) State.charges State.currentPosition State.surface State.placedMines State.life State.ennemyStateList}
 	 elseif {CanFire 'sonar' State} then %if all the above fail we try to fire a sonar
 	    KindFire=sonar
