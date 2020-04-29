@@ -279,20 +279,34 @@ in
       else
 	 if State.surface.surface==true then
 	    {Send State.port dive}
-	 end	
+	 end
+	 if S then
+	    {SimulateThinking}
+	 end
 	 if{Move State.port StateList } ==false then
 	    result(surface:true deads:nil id: State.id)
 	    else
+	    if S then
+	       {SimulateThinking}
+	    end
 	    {Charge State.port StateList}
+	     if S then
+		{SimulateThinking}
+	     end
 	    local Dead1 Dead in
 	       Dead1={Fire State.port StateList}
+	        if S then
+		   {SimulateThinking}
+		end
 	       Dead={Mine State.port Dead1}
 	       result(surface:false deads:Dead id:State.id)
 	    end
 	 end	    
       end
    end
-   
+   proc{SimulateThinking}
+        {Delay Input.thinkMin}
+   end
      
    fun{PartieTT StateList}
       local
@@ -372,6 +386,12 @@ in
       else
 	 {System.show 'Simultaneous Game'}
 	 Winner={PartieSS StateList}
+      end
+      if Winner==nil then
+	 {System.show 'Everyone is dead!'}
+      else
+	 {System.show 'Winner:'}
+	 {System.show Winner}
       end
    end
 end
