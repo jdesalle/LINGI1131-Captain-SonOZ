@@ -13,7 +13,6 @@ define
    SetState%%%%to set the state
    UpdateSurf
    Alive
-   GetPort
    ProcessStream
    GetFinalState
    %BroadCast's
@@ -68,16 +67,6 @@ in
    fun{SetState ID Port Surface}
       state(id:ID port:Port surface:Surface)
    end
-   fun {GetPort ID StateList}
-      case StateList of nil then null
-      []H|T then
-	 if H.id==ID then
-	    H.port
-	 else
-	    {GetPort ID T}
-	 end
-      end
-   end
    fun{UpdateSurf ID StateList}
       case StateList of nil then nil
       []H|T then
@@ -97,10 +86,10 @@ in
       local
 	 fun{CheckDead ID Deads}
 	    case Deads of nil then false
-	    []H|_ then
-	       if ID==H.id then true
+	    []H|T then
+	       if ID==H then true
 	       else
-		  false
+		  {CheckDead ID T}
 	       end
 	    end
 	 end
@@ -124,7 +113,7 @@ in
 	 {Broadcast Message T}
       end
    end
-   fun{BroadcastFire ID KindFire StateList}
+   fun{BroadcastFire ID KindFire Port StateList}
       case KindFire of nil then nil
       []missile(Position) then
 	 case StateList of nil then nil
@@ -133,16 +122,16 @@ in
 	       Message
 	    in
 	       {Send H.port sayMissileExplode(ID Position Message)}
-	       case Message of null then {BroadcastFire ID KindFire T}
+	       case Message of null then {BroadcastFire ID KindFire Port T}
 	       []sayDeath(ID)then
 		  {Broadcast Message StateList}
 		  {Send WindowPort lifeUpdate(ID 0)}
 		  {Send WindowPort removePlayer(ID)}
-		  ID|{BroadcastFire ID KindFire T}
+		  ID|{BroadcastFire ID KindFire Port T}
 	       []sayDamageTaken(ID Damage LifeLeft) then
 		  {Send WindowPort lifeUpdate(ID LifeLeft)}
 		  {Broadcast Message StateList}
-		  {BroadcastFire ID KindFire T}
+		  {BroadcastFire ID KindFire Port T}
 	       end
 	    end
 	 end
@@ -152,24 +141,24 @@ in
 	 nil
       []drone then
 	 local
-	    Answer
+	    Answer ID
 	 in
 	    case StateList of nil then nil
 	    []H|T then
-	       {Send H.port sayPassingDrone(drone H.id Answer)}
-	       {Send {GetPort ID StateList} sayAnswerDrone(drone H.id Answer)}
-	       {BroadcastFire ID KindFire T}
+	       {Send H.port sayPassingDrone(drone ID Answer)}
+	       {Send Port sayAnswerDrone(drone H.id Answer)}
+	       {BroadcastFire ID KindFire Port T}
 	    end
 	 end
       []sonar then
 	 local
-	    Answer
+	    Answer ID
 	 in
 	    case StateList of nil then nil
 	    []H|T then
-	       {Send H.port sayPassingSonar(sonar H.id Answer)}
-	       {Send {GetPort ID StateList} sayAnswerSonar(sonar H.id  Answer)}
-	       {BroadcastFire ID KindFire T}
+	       {Send H.port sayPassingSonar(ID Answer)}
+	       {Send Port sayAnswerSonar(sonar ID  Answer)}
+	       {BroadcastFire ID KindFire Port T}
 	    end
 	 end
       else
@@ -255,7 +244,7 @@ in
        in
 	  {Send Port fireItem(ID KindFire)}
 	  if KindFire \= null then
-	     {Alive StateList {BroadcastFire ID KindFire StateList}}
+	     {Alive StateList {BroadcastFire ID KindFire Port StateList}}
 	  else
 	     StateList
 	  end
