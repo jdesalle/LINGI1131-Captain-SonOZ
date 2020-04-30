@@ -43,10 +43,11 @@ in
    % state(pastPosition:PastPositions items:Items charges:Charges currentPosition:CurrentPosition surface:Surface placedMines:PlacedMines life:Life ennemyStateList:ennemyState(id:ID direction:DirectionList)|...|nil)
    proc{TreatStream Stream State PlayerID}
       case Stream of initPosition(ID Position)|T then
-	 {System.show 'treating initPosition'}
-	 {TreatStream T {InitPosition ?ID ?Position PlayerID}PlayerID}
+	 {System.show 'treating initPosition, State:'#State}
+	 {TreatStream T {InitPosition ?ID ?Position PlayerID} PlayerID}
 	 %----------------Actions--------
       []move(ID Position Direction)|T then
+	 {System.show 'treating move, pastPositions:'#State.pastPosition}
 	 if State.life=<0 then
 	    ID=null
 	    {TreatStream T State PlayerID}
@@ -282,9 +283,18 @@ in
       State
    end
 
+   %We remove the dead player from the ennemyStateList in order not to fire at him again.
    fun{SayDeath ID State}
       %{System.show 'Player of ID '#ID#' died. May he rest in peace'}
-      State
+      local Fun in
+	 fun{Fun Ele}
+	    if Ele.id==ID then false
+	    else
+	       true
+	    end
+	 end
+	   {ModifState State.pastPosition State.items State.charges State.currentPosition State.surface State.placedMines State.life {List.filter State.ennemyStateList Fun}}
+      end
    end
 
    fun{SayDamageTaken ID Damage LifeLeft State}
@@ -312,6 +322,7 @@ in
 %We can thus get stuck in U shapes if the other player is below us or in returned U shapes if the player is above us
    fun{Move ?ID ?Position ?Direction State PlayerID}
       ID=PlayerID
+      {System.show 'before moving ID:'#ID#'PastPositons'#State.pastPosition}
       local CardDirections MoveTowards IsPossible CurrentX CurrentY PossibleEnnemyPosition in
 	 CardDirections= 'east'|'west'|'south'|'north'|nil
 	 CurrentX=State.currentPosition.x
@@ -353,27 +364,7 @@ in
 	 end
 	 fun{MoveTowards DirectionList Point}
 	    if {ManhattanDistance Point State.currentPosition}=<Input.maxDistanceMissile then %We don't get too close so we can still kill him without giving us too much damage
-	       if {IsPossible 'east'}.bool then
-		  Position={IsPossible 'east'}.position
-		  Direction='east'
-		  {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	       elseif {IsPossible 'west'}.bool then
-		  Position={IsPossible 'west'}.position
-		  Direction='west'
-		  {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	       elseif {IsPossible 'north'}.bool then
-		  Position={IsPossible 'north'}.position
-		  Direction='north'
-		  {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	       elseif {IsPossible 'south'}.bool then
-		  Position={IsPossible 'south'}.position
-		  Direction='south'
-		  {ModifState {List.append State.pastPosition Position|nil} State.items State.charges Position State.surface State.placedMines State.life State.ennemyStateList}
-	       else
-		  Direction='surface'
-		  Position=State.currentPosition
-		  {ModifState Position|nil State.items State.charges Position surface(surface:true time:Input.turnSurface) State.placedMines State.life State.ennemyStateList}
-	       end
+	      {MoveTowards DirectionList {PickRandom PositionsAva}}%if we are too close to the other player we try to approach a random point.
 	    else
 	       local Direct NewPoint  in
 		  Direct={PickRandom DirectionList}
@@ -535,7 +526,7 @@ in
    end
 
    fun{Dive State}
-      {ModifState nil State.items State.charges State.currentPosition surface(surface:false time:0) State.placedMines State.life State.ennemyStateList}
+      {ModifState State.pastPosition State.items State.charges State.currentPosition surface(surface:false time:0) State.placedMines State.life State.ennemyStateList}
    end
 
 

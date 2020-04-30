@@ -474,7 +474,7 @@ in
 
 
    fun{Dive State}
-      {ModifState nil State.items State.charges State.currentPosition surface(surface:false time:0) State.placedMines State.life}
+      {ModifState State.pastPosition State.items State.charges State.currentPosition surface(surface:false time:0) State.placedMines State.life}
    end
 
 
