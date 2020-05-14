@@ -90,6 +90,9 @@ in
 	       true
 	    else
 	       case Deads of H|T then
+		  {System.show H.id}
+		  {System.show ID.id}
+		  {System.show H.id==ID.id}
 		  if ID.id==H.id then true
 		  else
 		     {CheckDead ID T}

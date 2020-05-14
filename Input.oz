@@ -97,7 +97,7 @@ in
       {CreateMatrixAAA [0] Nrow}.2 
    end
 end
-   NRow = 10
+   NRow = 8
    NColumn = 10
 
   
@@ -108,15 +108,13 @@ end
 	   [0 0 0 0 0 0 0 0 0 0]
 	   [0 0 0 0 0 0 0 0 0 0]
 	   [0 0 0 1 0 0 1 1 0 0]
-	   [0 0 1 1 0 0 1 0 0 0]
-	   [0 0 0 0 0 0 0 0 0 0]
-	   [0 0 0 0 0 0 0 0 0 0]]
+	   [0 0 1 1 0 0 1 0 0 0]]
 
 %%%% Players description %%%%
 
-   NbPlayer = 3
-   Players = [player004Smart player004Smart playerBasicAI]
-   Colors = [red green yellow]
+   NbPlayer = 2
+   Players = [player004Smart player004Smart]
+   Colors = [red green]
 
 %%%% Thinking parameters (only in simultaneous) %%%%
 
